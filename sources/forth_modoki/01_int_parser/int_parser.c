@@ -11,6 +11,28 @@ int main() {
 
     // write something here.
 
+    int count = 0;
+    const char *p = input;
+
+    do {
+        if (' ' == *p) {
+            while (' ' != *p++);
+            count++;
+        }
+        if (47 < *p && 58 > *p) {
+            switch (count) {
+                case 0:
+                    answer1 = (*p - 48) + (answer1 * 10);
+                    break;
+                case 1:
+                    answer2 = (*p - 48) + (answer2 * 10);
+                    break;
+                case 2:
+                    answer3 = (*p - 48) + (answer3 * 10);
+                    break;
+            }
+        }
+    } while ('\0' != *p++);
 
     // verity result.
     assert(answer1 == 123);
