@@ -19,7 +19,7 @@ int main() {
             while (' ' != *p++);
             count++;
         }
-        if (47 < *p && 58 > *p) {
+        if ('0' <= *p && '9' >= *p) {
             switch (count) {
                 case 0:
                     answer1 = (*p - 48) + (answer1 * 10);
