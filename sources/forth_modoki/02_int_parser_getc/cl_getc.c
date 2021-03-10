@@ -30,8 +30,11 @@ int _my_strcpy(char * dest, char const * src) {
 }
 
 void cl_getc_set_src(char *str) {
-    int test;
-    test = _my_strcpy(input, str);
-    printf("%d\n", test);
+    int cpied_len;
+    cpied_len = _my_strcpy(input, str);
+
+    if (strlen(str) != cpied_len)
+        puts("Did not copy correctly!");
+
     pos = 0;
 }
