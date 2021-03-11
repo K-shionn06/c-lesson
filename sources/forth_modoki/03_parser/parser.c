@@ -34,6 +34,49 @@ int parse_one(int prev_ch, struct Token *out_token) {
      * TODO: Implement here!
      * 
     ****/
+
+    int c;
+
+    if (EOF == prev_ch)
+        c = cl_getc(); 
+    else
+        c = prev_ch;
+
+    // checking the first charactor
+    if (' ' == c) {
+        // if c is the space
+
+        out_token->ltype = SPACE;
+        out_token->u.onechar = ' ';
+
+        while (' ' == c) {
+            c = cl_getc();
+        }
+
+        return c;
+    }
+    else if (('0' <= c) && ('9' >= c)) {
+        // if c is a number
+
+        out_token->ltype = NUMBER;
+        out_token->u.number = 0;
+        
+        while (('0' <= c) && ('9' >= c)) {
+            out_token->u.number = (c - '0') + (out_token->u.number * 10);
+            c = cl_getc();
+        }
+
+        return c;
+    }
+    else if (EOF == c) {
+        // if c is EOF
+
+        out_token->ltype = END_OF_FILE;
+
+        return EOF;
+    }
+
+
     out_token->ltype = UNKNOWN;
     return EOF;
 }
@@ -120,7 +163,7 @@ static void unit_tests() {
 int main() {
     unit_tests();
 
-    cl_getc_set_src("123 45 add /some { 2 3 add } def");
-    parser_print_all();
+    // cl_getc_set_src("123 45 add /some { 2 3 add } def");
+    // parser_print_all();
     return 0;
 }
