@@ -38,6 +38,18 @@ char parse_one(int *out_val, int *out_type, char forward_c) {
     }
 }
 
+void test_parse_one_123() {
+    char c;
+    int val, type;
+
+    cl_getc_set_src("123");
+    c = parse_one(&val, &type, '\0');
+
+    assert(' ' == c);
+    assert(123 == val);
+    assert(NUMBERS == type);
+}
+
 int main() {
     int answer1 = 0;
     int space = 0;
@@ -49,6 +61,10 @@ int main() {
    int answer1_type = 0;
    int space_type = 0;
    int answer2_type = 0;
+
+   test_parse_one_123();
+
+   cl_getc_set_src("123 456");
 
    c = parse_one(&answer1, &answer1_type, '\0');
    c = parse_one(&space, &space_type, c);
