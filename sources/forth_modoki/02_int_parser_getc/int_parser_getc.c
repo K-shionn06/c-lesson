@@ -10,10 +10,12 @@ typedef enum TOKEN_TYPES {
     SPACE
 } token_types_t;
 
-char parse_one(int *out_val, token_types_t *out_type, char forward_c) {
-    char c = forward_c;
-    if ('\0' == forward_c)
+int parse_one(int *out_val, token_types_t *out_type, int forward_c) {
+    int c;
+    if (EOF == forward_c)
         c = cl_getc();
+    else
+        c = forward_c;
 
     if (' ' == c) {
         *out_type = SPACE;
@@ -28,23 +30,23 @@ char parse_one(int *out_val, token_types_t *out_type, char forward_c) {
         *out_type = NUMBERS;
 
         while ('0' <= c && '9' >= c) {
-            *out_val = ((int) c - 48) + (*out_val * 10);
+            *out_val = (c - 48) + (*out_val * 10);
             c = cl_getc();
         }
         return c;
     }
     else {
-        return '\0';
+        return EOF;
     }
 }
 
 void test_parse_one_123() {
-    char c;
+    int c;
     int val;
     token_types_t type;
 
     cl_getc_set_src("123");
-    c = parse_one(&val, &type, '\0');
+    c = parse_one(&val, &type, EOF);
 
     assert(' ' == c);
     assert(123 == val);
@@ -52,13 +54,13 @@ void test_parse_one_123() {
 }
 
 void test_parse_one_123_456() {
-    char chars[3] = {0, 0, 0};
+    int chars[3] = {0, 0, 0};
     int vals[3] = {0, 0, 0};
     token_types_t types[3] = {0, 0, 0};
 
     cl_getc_set_src("123 456");
 
-    chars[0] = parse_one(&vals[0], &types[0], '\0');
+    chars[0] = parse_one(&vals[0], &types[0], EOF);
     chars[1] = parse_one(&vals[1], &types[1], chars[0]);
     chars[2] = parse_one(&vals[2], &types[2], chars[1]);
 
@@ -80,7 +82,7 @@ int main() {
 
     // write something here.
 
-   char c;
+   int c;
    token_types_t answer1_type = 0;
    token_types_t space_type = 0;
    token_types_t answer2_type = 0;
@@ -90,7 +92,7 @@ int main() {
 
    cl_getc_set_src("123 456");
 
-   c = parse_one(&answer1, &answer1_type, '\0');
+   c = parse_one(&answer1, &answer1_type, EOF);
    c = parse_one(&space, &space_type, c);
    c = parse_one(&answer2, &answer2_type, c);
 
