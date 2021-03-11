@@ -30,7 +30,7 @@ int parse_one(int *out_val, token_types_t *out_type, int forward_c) {
         *out_type = NUMBERS;
 
         while ('0' <= c && '9' >= c) {
-            *out_val = (c - 48) + (*out_val * 10);
+            *out_val = (c - '0') + (*out_val * 10);
             c = cl_getc();
         }
         return c;
