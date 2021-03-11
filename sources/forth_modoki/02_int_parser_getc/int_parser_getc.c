@@ -5,12 +5,12 @@
 cc cl_getc.c int_parser_getc.c
 */
 
-enum TYPES {
+typedef enum TOKEN_TYPES {
     NUMBERS,
     SPACE
-};
+} token_types_t;
 
-char parse_one(int *out_val, int *out_type, char forward_c) {
+char parse_one(int *out_val, token_types_t *out_type, char forward_c) {
     char c = forward_c;
     if ('\0' == forward_c)
         c = cl_getc();
@@ -40,7 +40,8 @@ char parse_one(int *out_val, int *out_type, char forward_c) {
 
 void test_parse_one_123() {
     char c;
-    int val, type;
+    int val;
+    token_types_t type;
 
     cl_getc_set_src("123");
     c = parse_one(&val, &type, '\0');
@@ -53,7 +54,7 @@ void test_parse_one_123() {
 void test_parse_one_123_456() {
     char chars[3] = {0, 0, 0};
     int vals[3] = {0, 0, 0};
-    int types[3] = {0, 0, 0};
+    token_types_t types[3] = {0, 0, 0};
 
     cl_getc_set_src("123 456");
 
@@ -80,9 +81,9 @@ int main() {
     // write something here.
 
    char c;
-   int answer1_type = 0;
-   int space_type = 0;
-   int answer2_type = 0;
+   token_types_t answer1_type = 0;
+   token_types_t space_type = 0;
+   token_types_t answer2_type = 0;
 
    test_parse_one_123();
    test_parse_one_123_456();
