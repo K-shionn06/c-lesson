@@ -50,6 +50,28 @@ void test_parse_one_123() {
     assert(NUMBERS == type);
 }
 
+void test_parse_one_123_456() {
+    char chars[3] = {0, 0, 0};
+    int vals[3] = {0, 0, 0};
+    int types[3] = {0, 0, 0};
+
+    cl_getc_set_src("123 456");
+
+    chars[0] = parse_one(&vals[0], &types[0], '\0');
+    chars[1] = parse_one(&vals[1], &types[1], chars[0]);
+    chars[2] = parse_one(&vals[2], &types[2], chars[1]);
+
+    assert(123 == vals[0]);
+    assert(' ' == vals[1]);
+    assert(456 == vals[2]);
+    assert(NUMBERS == types[0]);
+    assert(SPACE == types[1]);
+    assert(NUMBERS == types[2]);
+    assert(' ' == chars[0]);
+    assert('4' == chars[1]);
+    assert(EOF == chars[2]);
+}
+
 int main() {
     int answer1 = 0;
     int space = 0;
@@ -63,6 +85,7 @@ int main() {
    int answer2_type = 0;
 
    test_parse_one_123();
+   test_parse_one_123_456();
 
    cl_getc_set_src("123 456");
 
