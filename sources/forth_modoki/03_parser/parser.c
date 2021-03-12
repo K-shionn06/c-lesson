@@ -28,6 +28,22 @@ struct Token {
 
 #define NAME_SIZE 256
 
+int _isdigit(int c) {
+    if (('0' <= c) && ('9' >= c))
+        return 1;
+    
+    return 0;
+}
+
+int _isalpha(int c) {
+    if (('A' <= c) && ('Z' >= c))
+        return 1;
+    if (('a' <= c) && ('z' >= c))
+        return 1;
+    
+    return 0;
+}
+
 int parse_one(int prev_ch, struct Token *out_token) {
     int c;
 
@@ -36,10 +52,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
     else
         c = prev_ch;
 
-    // checking the first charactor
     if (' ' == c) {
-        // if c is the space
-
         out_token->ltype = SPACE;
         out_token->u.onechar = ' ';
 
@@ -49,13 +62,11 @@ int parse_one(int prev_ch, struct Token *out_token) {
 
         return c;
     }
-    else if (('0' <= c) && ('9' >= c)) {
-        // if c is a number
-
+    else if (_isdigit(c)) {
         out_token->ltype = NUMBER;
         out_token->u.number = 0;
         
-        while (('0' <= c) && ('9' >= c)) {
+        while (_isdigit(c)) {
             out_token->u.number = (c - '0') + (out_token->u.number * 10);
             c = cl_getc();
         }
@@ -63,8 +74,6 @@ int parse_one(int prev_ch, struct Token *out_token) {
         return c;
     }
     else if (EOF == c) {
-        // if c is EOF
-
         out_token->ltype = END_OF_FILE;
 
         return EOF;
