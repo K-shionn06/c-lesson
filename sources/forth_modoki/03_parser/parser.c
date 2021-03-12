@@ -29,12 +29,6 @@ struct Token {
 #define NAME_SIZE 256
 
 int parse_one(int prev_ch, struct Token *out_token) {
-    /****
-     * 
-     * TODO: Implement here!
-     * 
-    ****/
-
     int c;
 
     if (EOF == prev_ch)
@@ -154,10 +148,44 @@ static void test_parse_one_empty_should_return_END_OF_FILE() {
     assert(token.ltype == expect);
 }
 
+static void test_parse_one_executable_name() {
+    char *input = "add";
+    char *expect_name = "add";
+    int expect_type = EXECUTABLE_NAME;
+
+    struct Token token = {UNKNOWN, {0}};
+    int ch;
+
+    cl_getc_set_src(input);
+    ch = parse_one(EOF, &token);
+
+    assert(ch == EOF);
+    assert(token.ltype == expect_type);
+    assert(0 == strcmp(token.u.name, expect_name));
+}
+
+static void test_parse_one_literal_name() {
+    char *input = "/add";
+    char *expect_name = "add";
+    int expect_type = LITERAL_NAME;
+
+    struct Token token = {UNKNOWN, {0}};
+    int ch;
+
+    cl_getc_set_src(input);
+    ch = parse_one(EOF, &token);
+
+    assert(ch == EOF);
+    assert(token.ltype == expect_type);
+    assert(0 == strcmp(token.u.name, expect_name));
+}
+
 
 static void unit_tests() {
     test_parse_one_empty_should_return_END_OF_FILE();
     test_parse_one_number();
+    test_parse_one_executable_name();
+    test_parse_one_literal_name();
 }
 
 int main() {
