@@ -253,7 +253,6 @@ static void test_parse_one_literal_name() {
     cl_getc_set_src(input);
     ch = parse_one(EOF, &token);
 
-    printf("%d\n", ch);
     assert(ch == EOF);
     assert(token.ltype == expect_type);
     assert(0 == strcmp(token.u.name, expect_name));
