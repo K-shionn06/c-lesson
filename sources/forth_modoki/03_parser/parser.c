@@ -49,15 +49,8 @@ int _isalpha(int c) {
 int _isname(int c) {
     if (_isdigit(c) || _isalpha(c))
         return TRUE;
-
-    int white_list[24] = {'!', '@', '#', '$', '%', '^', '&', '*',
-                          '-', '_', '+', '=', ',', '.', '[', ']',
-                          '(', ')', '`', '~', '<', '>', '?', '|'};
-
-    for (int i = 0; i < 24; i++) {
-        if (white_list[i] == c)
-            return TRUE;
-    }
+    if (('-' == c) || ('_' == c))
+        return TRUE;
 
     return FALSE;
 }
@@ -122,11 +115,8 @@ int parse_one(int prev_ch, struct Token *out_token) {
     else if (_isalpha(c)) {
         // ltype: EXECUTABLE_NAME
 
-        char *name_p = (char *)malloc(NAME_SIZE); 
+        char name_p[NAME_SIZE];
         memset(name_p, 0, NAME_SIZE);
-
-        out_token->ltype = EXECUTABLE_NAME;
-        out_token->u.name = name_p;
 
         for (int i = 0; i < (NAME_SIZE - 1); i++) {
             if (_isname(c)) {
@@ -134,6 +124,10 @@ int parse_one(int prev_ch, struct Token *out_token) {
                 c = cl_getc();
             }
             else {
+                out_token->ltype = EXECUTABLE_NAME;
+                out_token->u.name = (char *)malloc(i + 1);
+                strcpy(out_token->u.name, name_p);
+
                 return c;
             }
         }
@@ -141,16 +135,8 @@ int parse_one(int prev_ch, struct Token *out_token) {
     else if ('/' == c) {
         // ltype: LITERAL_NAME
 
-        char *name_p = (char *)malloc(NAME_SIZE); 
+        char name_p[NAME_SIZE]; 
         memset(name_p, 0, NAME_SIZE);
-
-        out_token->ltype = LITERAL_NAME;
-        out_token->u.name = name_p;
-
-        c = cl_getc();
-        if (_isalpha(c) == FALSE) {
-            return c;
-        }
 
         c = cl_getc();
         for (int i = 0; i < (NAME_SIZE - 1); i++) {
@@ -159,6 +145,10 @@ int parse_one(int prev_ch, struct Token *out_token) {
                 c = cl_getc();
             }
             else {
+                out_token->ltype = LITERAL_NAME;
+                out_token->u.name = (char *)malloc(i + 1);
+                strcpy(out_token->u.name, name_p);
+
                 return c;
             }
         }
