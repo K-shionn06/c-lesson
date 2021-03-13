@@ -44,6 +44,22 @@ int _isalpha(int c) {
     return 0;
 }
 
+int _isname(int c) {
+    if (_isdigit(c) || _isalpha(c))
+        return 1;
+
+    int white_list[24] = {'!', '@', '#', '$', '%', '^', '&', '*',
+                          '-', '_', '+', '=', ',', '.', '[', ']',
+                          '(', ')', '`', '~', '<', '>', '?', '|'};
+
+    for (int i = 0; i < 24; i++) {
+        if (white_list[i] == c)
+            return 1;
+    }
+
+    return 0;
+}
+
 int parse_one(int prev_ch, struct Token *out_token) {
     int c;
 
@@ -111,7 +127,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
         out_token->u.name = name_p;
 
         for (int i = 0; i < (NAME_SIZE - 1); i++) {
-            if (_isalpha(c)) {
+            if (_isname(c)) {
                 name_p[i] = c;
                 c = cl_getc();
             }
@@ -227,8 +243,8 @@ static void test_parse_one_empty_should_return_END_OF_FILE() {
 }
 
 static void test_parse_one_executable_name() {
-    char *input = "add";
-    char *expect_name = "add";
+    char *input = "add123";
+    char *expect_name = "add123";
     int expect_type = EXECUTABLE_NAME;
 
     struct Token token = {UNKNOWN, {0}};
@@ -243,8 +259,8 @@ static void test_parse_one_executable_name() {
 }
 
 static void test_parse_one_literal_name() {
-    char *input = "/add";
-    char *expect_name = "add";
+    char *input = "/add123";
+    char *expect_name = "add123";
     int expect_type = LITERAL_NAME;
 
     struct Token token = {UNKNOWN, {0}};
