@@ -27,26 +27,28 @@ struct Token {
 };
 
 #define NAME_SIZE 256
+#define TRUE 1
+#define FALSE 0
 
 int _isdigit(int c) {
     if (('0' <= c) && ('9' >= c))
-        return 1;
+        return TRUE;
     
-    return 0;
+    return FALSE;
 }
 
 int _isalpha(int c) {
     if (('A' <= c) && ('Z' >= c))
-        return 1;
+        return TRUE;
     if (('a' <= c) && ('z' >= c))
-        return 1;
+        return TRUE;
     
-    return 0;
+    return FALSE;
 }
 
 int _isname(int c) {
     if (_isdigit(c) || _isalpha(c))
-        return 1;
+        return TRUE;
 
     int white_list[24] = {'!', '@', '#', '$', '%', '^', '&', '*',
                           '-', '_', '+', '=', ',', '.', '[', ']',
@@ -54,10 +56,10 @@ int _isname(int c) {
 
     for (int i = 0; i < 24; i++) {
         if (white_list[i] == c)
-            return 1;
+            return TRUE;
     }
 
-    return 0;
+    return FALSE;
 }
 
 int parse_one(int prev_ch, struct Token *out_token) {
@@ -135,7 +137,6 @@ int parse_one(int prev_ch, struct Token *out_token) {
                 return c;
             }
         }
-        // return c;
     }
     else if ('/' == c) {
         // ltype: LITERAL_NAME
@@ -147,8 +148,13 @@ int parse_one(int prev_ch, struct Token *out_token) {
         out_token->u.name = name_p;
 
         c = cl_getc();
+        if (_isalpha(c) == FALSE) {
+            return c;
+        }
+
+        c = cl_getc();
         for (int i = 0; i < (NAME_SIZE - 1); i++) {
-            if (_isalpha(c)) {
+            if (_isname(c)) {
                 name_p[i] = c;
                 c = cl_getc();
             }
@@ -156,7 +162,6 @@ int parse_one(int prev_ch, struct Token *out_token) {
                 return c;
             }
         }
-        // return c;
     }
     else if (EOF == c) {
         out_token->ltype = END_OF_FILE;
