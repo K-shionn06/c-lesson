@@ -53,6 +53,8 @@ int parse_one(int prev_ch, struct Token *out_token) {
         c = prev_ch;
 
     if (' ' == c) {
+        // ltype: SPACE
+
         out_token->ltype = SPACE;
         out_token->u.onechar = ' ';
 
@@ -63,6 +65,8 @@ int parse_one(int prev_ch, struct Token *out_token) {
         return c;
     }
     else if (_isdigit(c)) {
+        // ltype: NUMBER
+
         out_token->ltype = NUMBER;
         out_token->u.number = 0;
         
@@ -72,6 +76,47 @@ int parse_one(int prev_ch, struct Token *out_token) {
         }
 
         return c;
+    }
+    else if (_isalpha(c)) {
+        // ltype: EXECUTABLE_NAME
+
+        char *name_p = (char *)malloc(NAME_SIZE); 
+        memset(name_p, 0, NAME_SIZE);
+
+        out_token->ltype = EXECUTABLE_NAME;
+        out_token->u.name = name_p;
+
+        for (int i = 0; i < (NAME_SIZE - 1); i++) {
+            if (_isalpha(c)) {
+                name_p[i] = c;
+                c = cl_getc();
+            }
+            else {
+                return c;
+            }
+        }
+        // return c;
+    }
+    else if ('/' == c) {
+        // ltype: LITERAL_NAME
+
+        char *name_p = (char *)malloc(NAME_SIZE); 
+        memset(name_p, 0, NAME_SIZE);
+
+        out_token->ltype = LITERAL_NAME;
+        out_token->u.name = name_p;
+
+        c = cl_getc();
+        for (int i = 0; i < (NAME_SIZE - 1); i++) {
+            if (_isalpha(c)) {
+                name_p[i] = c;
+                c = cl_getc();
+            }
+            else {
+                return c;
+            }
+        }
+        // return c;
     }
     else if (EOF == c) {
         out_token->ltype = END_OF_FILE;
@@ -184,6 +229,7 @@ static void test_parse_one_literal_name() {
     cl_getc_set_src(input);
     ch = parse_one(EOF, &token);
 
+    printf("%d\n", ch);
     assert(ch == EOF);
     assert(token.ltype == expect_type);
     assert(0 == strcmp(token.u.name, expect_name));
@@ -200,7 +246,7 @@ static void unit_tests() {
 int main() {
     unit_tests();
 
-    // cl_getc_set_src("123 45 add /some { 2 3 add } def");
-    // parser_print_all();
+    cl_getc_set_src("123 45 add /some { 2 3 add } def");
+    parser_print_all();
     return 0;
 }
