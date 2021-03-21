@@ -6,8 +6,6 @@ stack_t global_stack;
 
 int main() {
     unit_test_suite(&global_stack);
-    return 0;
-}
 
 /* Stack system core functions */
 
@@ -80,16 +78,9 @@ void assert_stack_pop_FALSE(stack_t *stack, data_t *popped_data) {
     assert(FALSE == stack_pop(stack, popped_data));
 }
 
-void verify_stack_push_pop(stack_t *stack, data_t input) {
-    data_t popped_data;
-
-    assert_stack_push_TRUE(stack, input);
-    assert_stack_pop_TURE(stack, &popped_data);
-
-    assert(input == popped_data);
-}
-
 void unit_test_suite(stack_t *stack) {
+    /* Run this function to test functions */
+
     test_stack_clear(stack);
 
     test_stack_push_123(stack);
@@ -198,6 +189,5 @@ void test_stack_push_pop_string(stack_t *stack) {
     assert_stack_push_TRUE(stack, (long)input);
     assert_stack_pop_TURE(stack, &popped_data);
 
-    printf("%s, %s\n", input, (char *)popped_data);
     assert(0 == strcmp(input, (char *)popped_data));
 }
