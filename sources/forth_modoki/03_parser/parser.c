@@ -238,8 +238,8 @@ static void test_parse_one_empty_should_return_END_OF_FILE() {
 }
 
 static void test_parse_one_executable_name() {
-    char *input = "add123";
-    char *expect_name = "add123";
+    char *input = "_add123";
+    char *expect_name = "_add123";
     int expect_type = EXECUTABLE_NAME;
 
     struct Token token = {UNKNOWN, {0}};
