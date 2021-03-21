@@ -6,6 +6,8 @@ stack_t global_stack;
 
 int main() {
     unit_test_suite(&global_stack);
+    return 0;
+}
 
 /* Stack system core functions */
 
