@@ -27,16 +27,21 @@ void stack_print_all(stack_t *);
 
 /* Unit tests for Stack suite functions */
 
-void unit_test_suite();
+void assert_stack_push_TRUE(stack_t *, data_t);
+void assert_stack_push_FALSE(stack_t *, data_t);
+void assert_stack_pop_TURE(stack_t *, data_t *);
+void assert_stack_pop_FALSE(stack_t *, data_t *);
 
-void print_stack_status();
+void unit_test_suite(stack_t *);
 
-void test_stack_clear();
+void test_stack_clear(stack_t *);
 
-void test_stack_push_123();
-void test_stack_push_when_full();
+void test_stack_push_123(stack_t *);
+void test_stack_push_maximum(stack_t *);
+void test_stack_push_when_full(stack_t *);
 
-void test_stack_pop_when_empty();
+void test_stack_pop_when_empty(stack_t *);
 
-void test_stack_push_pop_123();
-void test_stack_push_pop_123_456();
+void test_stack_push_pop_123(stack_t *);
+void test_stack_push_pop_123_456(stack_t *);
+void test_stack_push_pop_string(stack_t *stack);
