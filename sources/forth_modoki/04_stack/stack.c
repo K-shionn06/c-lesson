@@ -5,10 +5,10 @@
 stack_t global_stack;
 
 int main() {
-    printf("%d, %ld\n", global_stack.pos, global_stack.body[4]);
     return 0;
 }
 
+/* Stack suite core functions */
 
 BOOL stack_pop(stack_t *stack, data_t * popped_data) {
     if (FALSE == stack_isempty(stack)) {
@@ -42,4 +42,21 @@ BOOL stack_isempty(stack_t *stack) {
         return TRUE;
     else
         return FALSE;
+}
+
+void stack_clear(stack_t *stack) {
+    for (int i = 0; i < STACK_SIZE; i++) {
+        stack->body[i] = 0;
+    }
+    stack->pos = 0;
+};
+
+void stack_print_all(stack_t *stack) {
+    int i;
+    puts("-----------------------------");
+    for (i = STACK_SIZE-1; i >= 0; i--) {
+        printf("     | %014ld |\n", stack->body[i]);
+        printf("%04d |----------------|\n", i);
+    }
+    puts("-----------------------------");
 }
