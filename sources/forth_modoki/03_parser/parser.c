@@ -1,58 +1,37 @@
 #include "clesson.h"
+#include "parser.h"
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <assert.h>
 
-enum LexicalType {
-    NUMBER,
-    SPACE,
-    EXECUTABLE_NAME,
-    LITERAL_NAME,
-    OPEN_CURLY,
-    CLOSE_CURLY, 
-    END_OF_FILE,
-    UNKNOWN
-};
-
-
-
-struct Token {
-    enum LexicalType ltype;
-    union {
-        int number;
-        char onechar;
-        char *name;
-    } u;
-};
-
 #define NAME_SIZE 256
-#define TRUE 1
-#define FALSE 0
 
-int _isdigit(int c) {
+bool _isdigit(int c) {
     if (('0' <= c) && ('9' >= c))
-        return TRUE;
+        return true;
     
-    return FALSE;
+    return false;
 }
 
-int _isalpha(int c) {
+bool _isalpha(int c) {
     if (('A' <= c) && ('Z' >= c))
-        return TRUE;
+        return true;
     if (('a' <= c) && ('z' >= c))
-        return TRUE;
+        return true;
     
-    return FALSE;
+    return false;
 }
 
-int _isname(int c) {
+bool _isname(int c) {
     if (_isdigit(c) || _isalpha(c))
-        return TRUE;
+        return true;
     if (('-' == c) || ('_' == c))
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 int parse_one(int prev_ch, struct Token *out_token) {
@@ -154,6 +133,8 @@ int parse_one(int prev_ch, struct Token *out_token) {
         }
     }
     else if (EOF == c) {
+        // ltype: END_OF_FILE
+
         out_token->ltype = END_OF_FILE;
 
         return EOF;
@@ -163,7 +144,6 @@ int parse_one(int prev_ch, struct Token *out_token) {
     out_token->ltype = UNKNOWN;
     return EOF;
 }
-
 
 void parser_print_all() {
     int ch = EOF;
@@ -204,7 +184,7 @@ void parser_print_all() {
 }
 
 
-
+/* unit tests */
 
 
 static void test_parse_one_number() {
