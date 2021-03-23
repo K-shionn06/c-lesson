@@ -2,8 +2,8 @@
 
 
 enum StackDataType {
-    NUMBER,
-    NAME
+    S_NUMBER,
+    S_NAME
 };
 
 union StackData {
