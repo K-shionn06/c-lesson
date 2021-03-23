@@ -290,7 +290,6 @@ static void unit_tests() {
     test_parse_one_close_curly();
 }
 
-#if 0
 int main() {
     unit_tests();
 
@@ -298,4 +297,3 @@ int main() {
     parser_print_all();
     return 0;
 }
-#endif
