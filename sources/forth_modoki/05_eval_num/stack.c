@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define STACK_SIZE 1024
+#define STACK_SIZE 10
 
 typedef struct {
     unsigned int pos;
@@ -202,7 +202,9 @@ void test_suite() {
     test_stack_isfull();
 }
 
+#if 0
 int main() {
     test_suite();
     return 0;
 }
+#endif
