@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdbool.h>
-
-#define STACK_SIZE 16
-
 enum StackDataType {
     NUMBER,
     NAME
@@ -18,13 +13,11 @@ typedef struct {
     union StackData u;
 } stack_data_t;
 
-typedef struct {
-    unsigned int pos;
-    stack_data_t body[STACK_SIZE];
-} stack_t;
+void stack_clear();
+
+bool stack_isfull();
+bool stack_isempty();
 
 bool stack_push_number(int);
 bool stack_push_string(char *);
 bool stack_pop(stack_data_t *);
-
-void stack_clear();
