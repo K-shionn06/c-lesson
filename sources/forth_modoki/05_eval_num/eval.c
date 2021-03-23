@@ -3,6 +3,42 @@
 #include "stack.h"
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
+
+
+bool streq(const char *s1, const char *s2) {
+    if (0 == strcmp(s1, s2))
+        return true;
+    else
+        return false;
+}
+
+void execute_add() {
+    int a, b;
+    bool succ;
+    stack_data_t out_stack_data;
+
+    succ = stack_pop(&out_stack_data);
+    if (succ) {
+        if (S_NUMBER == out_stack_data.dtype) {
+            a = out_stack_data.u.number;
+        }
+    }
+    else {
+        assert(0);
+    }
+    succ = stack_pop(&out_stack_data);
+    if (succ) {
+        if (S_NUMBER == out_stack_data.dtype) {
+            b = out_stack_data.u.number;
+        }
+    }
+    else {
+        assert(0);
+    }
+
+    stack_push_number(a + b);
+}
 
 void eval() {
     int ch = EOF;
@@ -17,6 +53,11 @@ void eval() {
             switch (token.ltype) {
                 case NUMBER:
                     stack_push_number(token.u.number);
+                    break;
+                case EXECUTABLE_NAME:
+                    if (streq("add", token.u.name)) {
+                        execute_add();
+                    }
                     break;
                 default:
                     break;
