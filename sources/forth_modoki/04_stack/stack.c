@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define STACK_SIZE 16
+#define STACK_SIZE 1024
 
 typedef struct {
     unsigned int pos;
@@ -26,6 +26,24 @@ void stack_clear() {
         global_stack.body[i].u.number = 0;
     }
     global_stack.pos = 0;
+}
+
+void stack_print_all() {
+    int i;
+    puts("-----------------------------");
+    for (i = STACK_SIZE-1; i >= 0; i--) {
+        switch (global_stack.body[i].dtype) {
+            case NUMBER:
+                printf("     | %014d |\n", global_stack.body[i].u.number);
+                break;
+            case NAME:
+                printf("     | %p | -> %s\n", global_stack.body[i].u.name,
+                                                global_stack.body[i].u.name);
+                break;
+        }
+        printf("%04d |----------------|\n", i);
+    }
+    puts("-----------------------------");
 }
 
 bool stack_isfull() {

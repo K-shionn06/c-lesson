@@ -1,3 +1,6 @@
+#include <stdbool.h>
+
+
 enum StackDataType {
     NUMBER,
     NAME
@@ -14,6 +17,7 @@ typedef struct {
 } stack_data_t;
 
 void stack_clear();
+void stack_print_all();
 
 bool stack_isfull();
 bool stack_isempty();
