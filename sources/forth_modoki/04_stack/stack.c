@@ -19,6 +19,29 @@ stack_t global_stack;
 
 /* core functions for global_stack */
 
+
+void stack_clear() {
+    for (int i = 0; i < STACK_SIZE; i++) {
+        global_stack.body[i].dtype = NUMBER;
+        global_stack.body[i].u.number = 0;
+    }
+    global_stack.pos = 0;
+}
+
+bool stack_isfull() {
+    if (STACK_SIZE == global_stack.pos)
+        return true;
+    else
+        return false;
+}
+
+bool stack_isempty() {
+    if (0 == global_stack.pos)
+        return true;
+    else
+        return false;
+}
+
 bool stack_push_number(int data) {
     if (false == stack_isfull()) {
         global_stack.body[global_stack.pos].dtype = NUMBER;
@@ -62,7 +85,9 @@ bool stack_pop(stack_data_t *out_stack_data) {
     }
 }
 
+
 /* unit tests */
+
 
 void test_stack_push_number_123() {
     int input = 123;
@@ -127,14 +152,39 @@ void test_stack_pop_helloworld() {
     assert(actual);
 }
 
+void test_stack_isfull() {
+    int input = 123;
+    bool actual;
+
+    stack_clear();
+    for (int i = 0; i < STACK_SIZE; i++) {
+        stack_push_number(input);
+    }
+    actual = stack_isfull();
+
+    assert(true == actual);
+}
+
+void test_stack_isempty() {
+    bool actual;
+
+    stack_clear();
+    actual = stack_isempty();
+
+    assert(true == actual);
+}
+
 void test_suite() {
     test_stack_push_number_123();
     test_stack_push_string_helloworld();
     test_stack_pop_when_empty();
     test_stack_pop_123();
     test_stack_pop_helloworld();
+    test_stack_isempty();
+    test_stack_isfull();
 }
 
 int main() {
     test_suite();
+    return 0;
 }
