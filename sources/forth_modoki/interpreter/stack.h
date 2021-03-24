@@ -17,15 +17,12 @@ typedef struct {
     union StackData u;
 } stack_data_t;
 
-void stack_clear();
 void stack_print_all();
 
-bool stack_isfull();
-bool stack_isempty();
-
 void stack_push_number(int);
-void stack_push_string(enum StackDataType, char *);
-void stack_pop(stack_data_t *);
+void stack_push_exe_name(char *);
+void stack_push_lit_name(char *);
 
 int stack_pop_number();
-char *stack_pop_string(enum StackDataType);
+char *stack_pop_exe_name();
+char *stack_pop_lit_name();

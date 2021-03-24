@@ -72,11 +72,17 @@ void stack_push_number(int data) {
 void stack_push_string(enum StackDataType dtype, char *data) {
     assert( !stack_isfull() );
     assert((S_EXE_NAME == dtype) || (S_LIT_NAME == dtype));
-    // assert( S_NUMBER != dtype );
 
     global_stack.body[global_stack.pos].dtype = dtype;
     global_stack.body[global_stack.pos].u.name = data;
     global_stack.pos += 1;
+}
+
+void stack_push_exe_name(char *data) {
+    stack_push_string(S_EXE_NAME, data);
+}
+void stack_push_lit_name(char *data) {
+    stack_push_string(S_LIT_NAME, data);
 }
 
 void stack_pop(stack_data_t *out_data) {
@@ -114,6 +120,14 @@ char *stack_pop_string(enum StackDataType dtype) {
     assert(dtype == data.dtype);
 
     return data.u.name;
+}
+
+char *stack_pop_exe_name() {
+    return stack_pop_string(S_EXE_NAME);
+}
+
+char *stack_pop_lit_name() {
+    return stack_pop_string(S_LIT_NAME);
 }
 
 
@@ -231,7 +245,9 @@ void test_suite() {
     test_stack_isfull();
 }
 
+#if 0
 int main() {
     test_suite();
     return 0;
 }
+#endif
