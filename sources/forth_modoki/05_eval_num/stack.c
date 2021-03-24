@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define STACK_SIZE 10
+#define STACK_SIZE 1024
 
 typedef struct {
     unsigned int pos;
@@ -60,47 +60,54 @@ bool stack_isempty() {
         return false;
 }
 
-bool stack_push_number(int data) {
-    if (false == stack_isfull()) {
-        global_stack.body[global_stack.pos].dtype = S_NUMBER;
-        global_stack.body[global_stack.pos].u.number = data;
-        global_stack.pos += 1;
-        return true;
-    }
-    else {
-        return false;
+void stack_push_number(int data) {
+    assert( !stack_isfull() );
+
+    global_stack.body[global_stack.pos].dtype = S_NUMBER;
+    global_stack.body[global_stack.pos].u.number = data;
+    global_stack.pos += 1;
+}
+
+void stack_push_string(char *data) {
+    assert( !stack_isfull() );
+
+    global_stack.body[global_stack.pos].dtype = S_NAME;
+    global_stack.body[global_stack.pos].u.name = data;
+    global_stack.pos += 1;
+}
+
+void stack_pop(stack_data_t *out_data) {
+    assert( !stack_isempty() );
+
+    global_stack.pos -= 1;
+    out_data->dtype = global_stack.body[global_stack.pos].dtype;
+
+    switch (out_data->dtype) {
+        case S_NUMBER:
+            out_data->u.number = global_stack.body[global_stack.pos].u.number;
+            break;
+        case S_NAME:
+            out_data->u.name = global_stack.body[global_stack.pos].u.name;
+            break;
     }
 }
 
-bool stack_push_string(char *data) {
-    if (false == stack_isfull()) {
-        global_stack.body[global_stack.pos].dtype = S_NAME;
-        global_stack.body[global_stack.pos].u.name = data;
-        global_stack.pos += 1;
-        return true;
-    }
-    else {
-        return false;
-    }
+void stack_pop_number(int *out_number) {
+    stack_data_t data;
+    stack_pop(&data);
+
+    assert(S_NUMBER == data.dtype);
+
+    *out_number = data.u.number;
 }
 
-bool stack_pop(stack_data_t *out_stack_data) {
-    if (false == stack_isempty()) {
-        global_stack.pos -= 1;
-        out_stack_data->dtype = global_stack.body[global_stack.pos].dtype;
-        switch (out_stack_data->dtype) {
-            case S_NUMBER:
-                out_stack_data->u.number = global_stack.body[global_stack.pos].u.number;
-                break;
-            case S_NAME:
-                out_stack_data->u.name = global_stack.body[global_stack.pos].u.name;
-                break;
-        }
-        return true;
-    }
-    else {
-        return false;
-    }
+void stack_pop_string(char **out_str) {
+    stack_data_t data;
+    stack_pop(&data);
+
+    assert(S_NAME == data.dtype);
+
+    *out_str = data.u.name;
 }
 
 
@@ -109,65 +116,51 @@ bool stack_pop(stack_data_t *out_stack_data) {
 
 void test_stack_push_number_123() {
     int input = 123;
-    bool actual;
-
-    stack_clear();
-    actual = stack_push_number(input);
-
-    assert(S_NUMBER == global_stack.body[0].dtype);
-    assert(input == global_stack.body[0].u.number);
-    assert(actual);
-}
-
-void test_stack_push_string_helloworld() {
-    char *input = (char *)malloc(strlen("helloworld") + 1);
-    strcpy(input, "helloworld");
-    bool actual;
-
-    stack_clear();
-    actual = stack_push_string(input);
-
-    assert(S_NAME == global_stack.body[0].dtype);
-    assert(input == global_stack.body[0].u.name);
-    assert(actual);
-}
-
-void test_stack_pop_when_empty() {
-    stack_data_t out_stack_data;
-    bool actual;
-
-    stack_clear();
-    actual = stack_pop(&out_stack_data);
-
-    assert(false == actual);
-}
-
-void test_stack_pop_123() {
-    int input = 123;
-    stack_data_t out_stack_data;
-    bool actual;
 
     stack_clear();
     stack_push_number(input);
-    actual = stack_pop(&out_stack_data);
 
-    assert(S_NUMBER == out_stack_data.dtype);
-    assert(input == out_stack_data.u.number);
-    assert(actual);
+    assert(S_NUMBER == global_stack.body[0].dtype);
+    assert(input == global_stack.body[0].u.number);
 }
-void test_stack_pop_helloworld() {
-    char *input = (char *)malloc(strlen("helloworld") + 1);
-    strcpy(input, "helloworld");
-    stack_data_t out_stack_data;
-    bool actual;
+
+void test_stack_push_string_helloworld() {
+    char *input = "helloworld";
 
     stack_clear();
     stack_push_string(input);
-    actual = stack_pop(&out_stack_data);
 
-    assert(S_NAME == out_stack_data.dtype);
-    assert(input == out_stack_data.u.name);
-    assert(actual);
+    assert(S_NAME == global_stack.body[0].dtype);
+    assert(0 == strcmp(input, global_stack.body[0].u.name));
+}
+
+void test_stack_pop_when_empty() {
+    // This should fail
+
+    stack_data_t data;
+
+    stack_clear();
+    stack_pop(&data);
+}
+
+void test_stack_pop_123() {
+    int input = 123, actual;
+
+    stack_clear();
+    stack_push_number(input);
+    stack_pop_number(&actual);
+
+    assert(input == actual);
+}
+
+void test_stack_pop_helloworld() {
+    char *input = "helloworld", *actual;
+
+    stack_clear();
+    stack_push_string(input);
+    stack_pop_string(&actual);
+
+    assert(0 == strcmp(input, actual));
 }
 
 void test_stack_isfull() {
@@ -195,16 +188,14 @@ void test_stack_isempty() {
 void test_suite() {
     test_stack_push_number_123();
     test_stack_push_string_helloworld();
-    test_stack_pop_when_empty();
+    // test_stack_pop_when_empty();
     test_stack_pop_123();
     test_stack_pop_helloworld();
     test_stack_isempty();
     test_stack_isfull();
 }
 
-#if 0
 int main() {
     test_suite();
     return 0;
 }
-#endif
