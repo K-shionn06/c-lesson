@@ -36,7 +36,8 @@ void stack_print_all() {
             case S_NUMBER:
                 printf("     | %014d |\n", global_stack.body[i].u.number);
                 break;
-            case S_NAME:
+            case S_EXE_NAME:
+            case S_LIT_NAME:
                 printf("     | %p | -> %s\n", global_stack.body[i].u.name,
                                                 global_stack.body[i].u.name);
                 break;
@@ -68,10 +69,18 @@ void stack_push_number(int data) {
     global_stack.pos += 1;
 }
 
-void stack_push_string(char *data) {
+void stack_push_exe_name(char *data) {
     assert( !stack_isfull() );
 
-    global_stack.body[global_stack.pos].dtype = S_NAME;
+    global_stack.body[global_stack.pos].dtype = S_EXE_NAME;
+    global_stack.body[global_stack.pos].u.name = data;
+    global_stack.pos += 1;
+}
+
+void stack_push_lit_name(char *data) {
+    assert( !stack_isfull() );
+
+    global_stack.body[global_stack.pos].dtype = S_LIT_NAME;
     global_stack.body[global_stack.pos].u.name = data;
     global_stack.pos += 1;
 }
@@ -86,7 +95,8 @@ void stack_pop(stack_data_t *out_data) {
         case S_NUMBER:
             out_data->u.number = global_stack.body[global_stack.pos].u.number;
             break;
-        case S_NAME:
+        case S_EXE_NAME:
+        case S_LIT_NAME:
             out_data->u.name = global_stack.body[global_stack.pos].u.name;
             break;
     }
@@ -101,11 +111,20 @@ void stack_pop_number(int *out_number) {
     *out_number = data.u.number;
 }
 
-void stack_pop_string(char **out_str) {
+void stack_pop_exe_name(char **out_str) {
     stack_data_t data;
     stack_pop(&data);
 
-    assert(S_NAME == data.dtype);
+    assert(S_EXE_NAME == data.dtype);
+
+    *out_str = data.u.name;
+}
+
+void stack_pop_lit_name(char **out_str) {
+    stack_data_t data;
+    stack_pop(&data);
+
+    assert(S_LIT_NAME == data.dtype);
 
     *out_str = data.u.name;
 }
@@ -124,13 +143,23 @@ void test_stack_push_number_123() {
     assert(input == global_stack.body[0].u.number);
 }
 
-void test_stack_push_string_helloworld() {
+void test_stack_push_string_as_exe() {
     char *input = "helloworld";
 
     stack_clear();
-    stack_push_string(input);
+    stack_push_exe_name(input);
 
-    assert(S_NAME == global_stack.body[0].dtype);
+    assert(S_EXE_NAME == global_stack.body[0].dtype);
+    assert(0 == strcmp(input, global_stack.body[0].u.name));
+}
+
+void test_stack_push_string_as_lit() {
+    char *input = "helloworld";
+
+    stack_clear();
+    stack_push_lit_name(input);
+
+    assert(S_LIT_NAME == global_stack.body[0].dtype);
     assert(0 == strcmp(input, global_stack.body[0].u.name));
 }
 
@@ -151,16 +180,6 @@ void test_stack_pop_123() {
     stack_pop_number(&actual);
 
     assert(input == actual);
-}
-
-void test_stack_pop_helloworld() {
-    char *input = "helloworld", *actual;
-
-    stack_clear();
-    stack_push_string(input);
-    stack_pop_string(&actual);
-
-    assert(0 == strcmp(input, actual));
 }
 
 void test_stack_isfull() {
@@ -187,17 +206,15 @@ void test_stack_isempty() {
 
 void test_suite() {
     test_stack_push_number_123();
-    test_stack_push_string_helloworld();
     // test_stack_pop_when_empty();
     test_stack_pop_123();
-    test_stack_pop_helloworld();
     test_stack_isempty();
     test_stack_isfull();
 }
 
-#if 0
 int main() {
-    test_suite();
+    // test_suite();
+    test_stack_push_string_as_exe();
+    test_stack_push_string_as_lit();
     return 0;
 }
-#endif
