@@ -22,6 +22,9 @@ void stack_print_all();
 bool stack_isfull();
 bool stack_isempty();
 
-bool stack_push_number(int);
-bool stack_push_string(char *);
-bool stack_pop(stack_data_t *);
+void stack_push_number(int);
+void stack_push_string(char *);
+void stack_pop(stack_data_t *);
+
+void stack_pop_number(int *);
+void stack_pop_string(char **);
