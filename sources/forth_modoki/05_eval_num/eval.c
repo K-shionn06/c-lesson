@@ -14,30 +14,12 @@ bool streq(const char *s1, const char *s2) {
 }
 
 void execute_add() {
-    int a, b;
-    bool succ;
-    stack_data_t out_stack_data;
+    int number1, number2;
 
-    succ = stack_pop(&out_stack_data);
-    if (succ) {
-        if (S_NUMBER == out_stack_data.dtype) {
-            a = out_stack_data.u.number;
-        }
-    }
-    else {
-        assert(0);
-    }
-    succ = stack_pop(&out_stack_data);
-    if (succ) {
-        if (S_NUMBER == out_stack_data.dtype) {
-            b = out_stack_data.u.number;
-        }
-    }
-    else {
-        assert(0);
-    }
+    stack_pop_number(&number1);
+    stack_pop_number(&number2);
 
-    stack_push_number(a + b);
+    stack_push_number(number1 + number2);
 }
 
 void eval() {
@@ -75,18 +57,7 @@ static void test_eval_num_one() {
     eval();
 
     int actual = 0;
-    bool succ;
-    stack_data_t out_stack_data;
-
-    succ = stack_pop(&out_stack_data);
-    if (succ) {
-        if (S_NUMBER == out_stack_data.dtype) {
-            actual = out_stack_data.u.number;
-        }
-    }
-    else {
-        assert(0);
-    }
+    stack_pop_number(&actual);
 
     assert(expect == actual);
 
@@ -103,27 +74,8 @@ static void test_eval_num_two() {
 
     int actual1 = 0;
     int actual2 = 0;
-    bool succ;
-    stack_data_t out_stack_data;
-
-    succ = stack_pop(&out_stack_data);
-    if (succ) {
-        if (S_NUMBER == out_stack_data.dtype) {
-            actual1 = out_stack_data.u.number;
-        }
-    }
-    else {
-        assert(0);
-    }
-    succ = stack_pop(&out_stack_data);
-    if (succ) {
-        if (S_NUMBER == out_stack_data.dtype) {
-            actual2 = out_stack_data.u.number;
-        }
-    }
-    else {
-        assert(0);
-    }
+    stack_pop_number(&actual1);
+    stack_pop_number(&actual2);
 
     assert(expect1 == actual1);
     assert(expect2 == actual2);
@@ -139,22 +91,10 @@ static void test_eval_num_add() {
     eval();
 
     int actual = 0;
-    bool succ;
-    stack_data_t out_stack_data;
-
-    succ = stack_pop(&out_stack_data);
-    if (succ) {
-        if (S_NUMBER == out_stack_data.dtype) {
-            actual = out_stack_data.u.number;
-        }
-    }
-    else {
-        assert(0);
-    }
+    stack_pop_number(&actual);
 
     assert(expect == actual);
 }
-
 
 int main() {
     test_eval_num_one();

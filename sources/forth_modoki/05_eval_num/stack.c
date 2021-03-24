@@ -195,7 +195,9 @@ void test_suite() {
     test_stack_isfull();
 }
 
+#if 0
 int main() {
     test_suite();
     return 0;
 }
+#endif
