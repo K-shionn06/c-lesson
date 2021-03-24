@@ -69,18 +69,12 @@ void stack_push_number(int data) {
     global_stack.pos += 1;
 }
 
-void stack_push_exe_name(char *data) {
+void stack_push_string(enum StackDataType dtype, char *data) {
     assert( !stack_isfull() );
+    assert((S_EXE_NAME == dtype) || (S_LIT_NAME == dtype));
+    // assert( S_NUMBER != dtype );
 
-    global_stack.body[global_stack.pos].dtype = S_EXE_NAME;
-    global_stack.body[global_stack.pos].u.name = data;
-    global_stack.pos += 1;
-}
-
-void stack_push_lit_name(char *data) {
-    assert( !stack_isfull() );
-
-    global_stack.body[global_stack.pos].dtype = S_LIT_NAME;
+    global_stack.body[global_stack.pos].dtype = dtype;
     global_stack.body[global_stack.pos].u.name = data;
     global_stack.pos += 1;
 }
@@ -102,31 +96,24 @@ void stack_pop(stack_data_t *out_data) {
     }
 }
 
-void stack_pop_number(int *out_number) {
+int stack_pop_number() {
     stack_data_t data;
     stack_pop(&data);
 
     assert(S_NUMBER == data.dtype);
 
-    *out_number = data.u.number;
+    return data.u.number;
 }
 
-void stack_pop_exe_name(char **out_str) {
+char *stack_pop_string(enum StackDataType dtype) {
+    assert((S_EXE_NAME == dtype) || (S_LIT_NAME == dtype));
+
     stack_data_t data;
     stack_pop(&data);
 
-    assert(S_EXE_NAME == data.dtype);
+    assert(dtype == data.dtype);
 
-    *out_str = data.u.name;
-}
-
-void stack_pop_lit_name(char **out_str) {
-    stack_data_t data;
-    stack_pop(&data);
-
-    assert(S_LIT_NAME == data.dtype);
-
-    *out_str = data.u.name;
+    return data.u.name;
 }
 
 
@@ -147,7 +134,7 @@ void test_stack_push_string_as_exe() {
     char *input = "helloworld";
 
     stack_clear();
-    stack_push_exe_name(input);
+    stack_push_string(S_EXE_NAME, input);
 
     assert(S_EXE_NAME == global_stack.body[0].dtype);
     assert(0 == strcmp(input, global_stack.body[0].u.name));
@@ -157,7 +144,7 @@ void test_stack_push_string_as_lit() {
     char *input = "helloworld";
 
     stack_clear();
-    stack_push_lit_name(input);
+    stack_push_string(S_LIT_NAME, input);
 
     assert(S_LIT_NAME == global_stack.body[0].dtype);
     assert(0 == strcmp(input, global_stack.body[0].u.name));
@@ -177,9 +164,33 @@ void test_stack_pop_123() {
 
     stack_clear();
     stack_push_number(input);
-    stack_pop_number(&actual);
+    actual = stack_pop_number();
 
     assert(input == actual);
+}
+
+void test_stack_pop_exe_name() {
+    char *input = "hellowrold";
+    char *actual;
+
+    stack_clear();
+    stack_push_string(S_EXE_NAME, input);
+
+    actual = stack_pop_string(S_EXE_NAME);
+
+    assert(0 == strcmp(input, actual));
+}
+
+void test_stack_pop_lit_name() {
+    char *input = "hellowrold";
+    char *actual;
+
+    stack_clear();
+    stack_push_string(S_LIT_NAME, input);
+
+    actual = stack_pop_string(S_LIT_NAME);
+
+    assert(0 == strcmp(input, actual));
 }
 
 void test_stack_isfull() {
@@ -207,14 +218,20 @@ void test_stack_isempty() {
 void test_suite() {
     test_stack_push_number_123();
     // test_stack_pop_when_empty();
+
+    test_stack_push_string_as_exe();
+    test_stack_push_string_as_lit();
+
     test_stack_pop_123();
+
+    test_stack_pop_exe_name();
+    test_stack_pop_lit_name();
+
     test_stack_isempty();
     test_stack_isfull();
 }
 
 int main() {
-    // test_suite();
-    test_stack_push_string_as_exe();
-    test_stack_push_string_as_lit();
+    test_suite();
     return 0;
 }
