@@ -75,32 +75,36 @@ void dict_put(char *key, dict_value_t value) {
     }
 }
 
+void dict_array_copy_value(int idx, dict_value_t *out_value) {
+        out_value->dtype = dict_array[idx].value.dtype;
+
+        switch (out_value->dtype) {
+            case S_NUMBER:
+                out_value->u.number = dict_array[idx].value.u.number;
+                break;
+            case S_EXE_NAME:
+            case S_LIT_NAME:
+                out_value->u.name = dict_array[idx].value.u.name;
+                break;
+        }
+}
+
+bool dict_get(char *key, dict_value_t * out_value) {
+    for (int i = 0; i < dict_pos; i++) {
+        if (streq(key, dict_array[i].key)) {
+            dict_array_copy_value(i, out_value);
+            return true;
+        }
+    }
+    return false;
+}
+
 void dict_put_number(char *key, int data) {
     dict_value_t value;
     value.dtype = S_NUMBER;
     value.u.number = data;
 
     dict_put(key, value);
-}
-
-bool dict_get(char *key, dict_value_t * out_value) {
-    for (int i = 0; i < dict_pos; i++) {
-        if (streq(key, dict_array[i].key)) {
-            out_value->dtype = dict_array[i].value.dtype;
-
-            switch (out_value->dtype) {
-                case S_NUMBER:
-                    out_value->u.number = dict_array[i].value.u.number;
-                    break;
-                case S_EXE_NAME:
-                case S_LIT_NAME:
-                    out_value->u.name = dict_array[i].value.u.name;
-                    break;
-            }
-            return true;
-        }
-    }
-    return false;
 }
 
 int dict_get_number(char *key) {
