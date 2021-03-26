@@ -1,6 +1,3 @@
-#include <stdbool.h>
-
-
 enum StackDataType {
     S_NUMBER,
     S_EXE_NAME,

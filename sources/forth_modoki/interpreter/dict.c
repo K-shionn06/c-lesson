@@ -1,4 +1,6 @@
 #include "dict.h"
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -24,17 +26,6 @@ bool streq(const char *s1, const char *s2) {
 /* core functions */
 
 
-/*
-bool dict_get_idx(char *key, int *idx) {
-    for (int i = 0; i < dict_pos; i++) {
-        if (streq(key, dict_array[i].key))
-            *idx = i;
-            return true;
-    }
-    return false;
-}
-*/
-
 int dict_get_idx(char *key) {
     for (int i = 0; i < dict_pos; i++) {
         if (streq(key, dict_array[i].key))
@@ -43,11 +34,11 @@ int dict_get_idx(char *key) {
     return -1; // -1 is impossible for array index
 }
 
-void dict_array_set_key(int idx, char *key) {
+static void dict_array_set_key(int idx, char *key) {
     dict_array[idx].key = key;
 }
 
-void dict_array_set_value(int idx, dict_value_t *value) {
+static void dict_array_set_value(int idx, dict_value_t *value) {
     assert( idx <= dict_pos );
 
     switch (value->dtype) {
@@ -233,6 +224,7 @@ static void test_dict_get_number() {
     assert(input_number == actual_number);
 }
 
+#if 0
 int main() {
     test_dict_put_new_key();
     test_dict_put_used_key();
@@ -243,3 +235,4 @@ int main() {
     dict_print_all();
     return 0;
 }
+#endif

@@ -1,23 +1,24 @@
 #include "clesson.h"
 #include "parser.h"
-#include "stack.h"
+#include "dict.h"
+
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 
 
-bool streq(const char *s1, const char *s2) {
-    if (0 == strcmp(s1, s2))
-        return true;
-    else
-        return false;
-}
-
-void execute_add() {
+static void execute_add() {
     int number1 = stack_pop_number();
     int number2 = stack_pop_number();
 
     stack_push_number(number1 + number2);
+}
+
+static void execute_def() {
+    int number = stack_pop_number();
+    char *lit_name = stack_pop_lit_name();
+    
+    dict_put_number(lit_name, number);
 }
 
 void eval() {
@@ -34,10 +35,20 @@ void eval() {
                 case NUMBER:
                     stack_push_number(token.u.number);
                     break;
+
                 case EXECUTABLE_NAME:
-                    if (streq("add", token.u.name))
+                    if (streq("add", token.u.name)) {
                         execute_add();
+                    }
+                    else if (streq("def", token.u.name)) {
+                        execute_def();
+                    }
+                    else if (-1 != dict_get_idx(token.u.name)) {
+                        int number = dict_get_number(token.u.name);
+                        stack_push_number(number);
+                    }
                     break;
+
                 case LITERAL_NAME:
                     stack_push_lit_name(token.u.name);
                     break;
@@ -105,11 +116,25 @@ static void test_eval_lit() {
     assert(0 == strcmp(expect, actual));
 }
 
+static void test_eval_def() {
+    char *input = "/abc 123 def /efg 456 def abc efg add";
+    int expect = 579;
+    
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
 int main() {
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
     test_eval_lit();
+    test_eval_def();
 
     return 0;
 }
