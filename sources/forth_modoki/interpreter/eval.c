@@ -47,6 +47,9 @@ void eval() {
                         int number = dict_get_number(token.u.name);
                         stack_push_number(number);
                     }
+                    else {
+                        assert(false);
+                    }
                     break;
 
                 case LITERAL_NAME:
