@@ -2,19 +2,23 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
+#define TABLE_SIZE 1024
 
-#define DICT_SIZE 1024
-
-typedef struct {
+struct Node {
     char *key;
-    dict_value_t value;
-} dict_elem_t;
+    int value;
+    struct Node *next;
+};
 
-static int dict_pos = 0;
-static dict_elem_t dict_array[DICT_SIZE];
+struct Node *array[TABLE_SIZE];
+
+
+/* functions */
+
 
 bool streq(const char *s1, const char *s2) {
     if (0 == strcmp(s1, s2))
@@ -23,216 +27,195 @@ bool streq(const char *s1, const char *s2) {
         return false;
 }
 
-/* core functions */
-
-
-int dict_get_idx(char *key) {
-    for (int i = 0; i < dict_pos; i++) {
-        if (streq(key, dict_array[i].key))
-            return i;
+static int hash(char *str) {
+    unsigned int val = 0;
+    while (*str) {
+        val += *str++;
     }
-    return -1; // -1 is impossible for array index
+    return (int)(val % 1024);
 }
 
-static void dict_array_set_key(int idx, char *key) {
-    dict_array[idx].key = key;
+static struct Node * make_new_node(char *key, int value) {
+    struct Node *node;
+    node = (struct Node *)malloc(sizeof(struct Node));
+
+    node->key = key;
+    node->value = value;
+
+    return node;
 }
 
-static void dict_array_set_value(int idx, dict_value_t *value) {
-    assert( idx <= dict_pos );
+static struct Node * get_end_node(struct Node *head) {
+    struct Node *node;
+    node = head;
 
-    switch (value->dtype) {
-        case S_NUMBER:
-            dict_array[idx].value.dtype = value->dtype;
-            dict_array[idx].value.u.number = value->u.number;
-            break;
-        case S_EXE_NAME:
-        case S_LIT_NAME:
-            dict_array[idx].value.dtype = value->dtype;
-            dict_array[idx].value.u.name = value->u.name;
-            break;
+    while (true) {
+        if (NULL == node->next)
+            return node;
+        else
+            node = node->next;
     }
 }
 
-static void dict_reassign(char *key, dict_value_t *value) {
-    int idx = dict_get_idx(key);
-    assert( -1 != idx );
+static struct Node * search_node_by_key(struct Node *head, char *key) {
+    struct Node *node;
+    node = head;
 
-    dict_array_set_value(idx, value);
+    while (NULL != node) {
+        if (streq(key, node->key))
+            return node;
+        else
+            node = node->next;
+    }
+
+    return NULL;
 }
 
-static void dict_put(char *key, dict_value_t *value) {
-    assert(dict_pos < DICT_SIZE);
+static void update_node(struct Node *head, char *key, int value) {
+    struct Node *node;
+    node = search_node_by_key(head, key);
+    assert(NULL != node);
 
-    if (-1 != dict_get_idx(key)) {
-        dict_reassign(key, value);
+    node->value = value;
+}
+
+static void insert_node(struct Node *head, char *key, int value) {
+    struct Node *node;
+    node = get_end_node(head);
+    assert(node != NULL);
+
+    node->next = make_new_node(key, value);
+}
+
+static void update_or_insert_list(int idx, char *key, int value) {
+    struct Node *node;
+    node = search_node_by_key(array[idx], key);
+    assert(NULL != node);
+
+    if (NULL == node) {
+        insert_node(array[idx], key, value);
     }
     else {
-        dict_array_set_key(dict_pos, key);
-        dict_array_set_value(dict_pos, value);
-        dict_pos++;
+        update_node(array[idx], key, value);
     }
 }
 
-static void dict_array_copy_value(int idx, dict_value_t *out_value) {
-        out_value->dtype = dict_array[idx].value.dtype;
+bool dict_key_isused(char *key) {
+    int idx = hash(key);
 
-        switch (out_value->dtype) {
-            case S_NUMBER:
-                out_value->u.number = dict_array[idx].value.u.number;
-                break;
-            case S_EXE_NAME:
-            case S_LIT_NAME:
-                out_value->u.name = dict_array[idx].value.u.name;
-                break;
-        }
-}
-
-static bool dict_get(char *key, dict_value_t *out_value) {
-    int idx = dict_get_idx(key);
-
-    if (-1 != idx) {
-        dict_array_copy_value(idx, out_value);
+    if (NULL != search_node_by_key(array[idx], key))
         return true;
-    }
-    else {
+    else
         return false;
-    }
 }
 
-void dict_put_number(char *key, int data) {
-    dict_value_t value;
-    value.dtype = S_NUMBER;
-    value.u.number = data;
+void dict_put_number(char *key, int value) {
+    int idx = hash(key);
 
-    dict_put(key, &value);
+    if (NULL == array[idx]) {
+        array[idx] = make_new_node(key, value);
+    }
+    else {
+        update_or_insert_list(idx, key, value);
+    }
 }
 
 int dict_get_number(char *key) {
-    dict_value_t value;
+    int idx = hash(key);
+    struct Node *node;
+    node = search_node_by_key(array[idx], key);
 
-    bool succ = dict_get(key, &value);
-
-    assert(succ);
-    assert(S_NUMBER == value.dtype);
-
-    return value.u.number;
+    return node->value;
 }
 
-void dict_print_all() {
-    puts("------------------------------------");
-    puts("|    key    |    dtype    |    u    ");
-    puts("------------------------------------");
-    for (int i = 0; i < dict_pos; i++) {
-        switch (dict_array[i].value.dtype) {
-            case S_NUMBER:
-                printf("| %s | %d | %d\n", dict_array[i].key,
-                                         dict_array[i].value.dtype,
-                                         dict_array[i].value.u.number);
-                break;
-            case S_EXE_NAME:
-            case S_LIT_NAME:
-                printf("| %s | %d | %s\n", dict_array[i].key,
-                                         dict_array[i].value.dtype,
-                                         dict_array[i].value.u.name);
-                break;
-        }
+
+/* unit test */
+
+
+static void clear_array_for_test() {
+    // This function only for test
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        array[i] = NULL;
     }
-    puts("------------------------------------");
-};
-
-
-/* UnitTests */
-
-
-static void assert_value_number(int expect, dict_value_t *actual) {
-    assert(S_NUMBER == actual->dtype);
-    assert(expect == actual->u.number);
 }
 
-static void test_dict_put_new_key() {
-    char *input_key = "banana";
-    dict_value_t input_value = {
-        S_NUMBER,
-        {200}
-    };
+static void assert_1st_node(char *expect_key, int expect_value) {
+    int idx = hash(expect_key);
 
-    dict_pos = 0;
-    dict_put(input_key, &input_value);
-
-    assert(input_key == dict_array[0].key);
-    assert_value_number(input_value.u.number, &dict_array[0].value);
+    assert(streq(expect_key, array[idx]->key));
+    assert(expect_value == array[idx]->value);
 }
 
-static void test_dict_put_used_key() {
-    char *input_key = "blue";
-    dict_value_t input_value1 = {
-        S_NUMBER,
-        {300}
-    };
-    dict_value_t input_value2 = {
-        S_NUMBER,
-        {2100}
-    };
+static void assert_2nd_node(char *expect_key, int expect_value) {
+    int idx = hash(expect_key);
 
-    dict_pos = 0;
-    dict_put(input_key, &input_value1);
-    dict_put(input_key, &input_value2);
-
-    assert_value_number(input_value2.u.number, &dict_array[0].value);
+    assert(streq(expect_key, array[idx]->next->key));
+    assert(expect_value == array[idx]->next->value);
 }
 
-static void test_dict_get_elem() {
+static void test_update_node() {
+    char *input_key = "apple";
+    int input_idx = hash(input_key);
+    int input_number = 2000;
+    int expect_number = 3000; 
+
+    clear_array_for_test();
+    array[input_idx] = make_new_node(input_key, input_number);
+
+    update_node(array[input_idx], input_key, expect_number);
+
+    assert_1st_node(input_key, expect_number);
+}
+
+static void test_insert_node() {
+    // This test depends on hash function
+
+    char *input_key1 = "abc";
+    char *input_key2 = "cba";
+    int input_idx = hash(input_key1);
+    int input_number1 = 2000;
+    int input_number2 = 3000; 
+
+    clear_array_for_test();
+    array[input_idx] = make_new_node(input_key1, input_number1);
+
+    assert(array[input_idx] != NULL);
+    insert_node(array[input_idx], input_key2, input_number2);
+
+    assert_2nd_node(input_key2, input_number2);
+}
+
+static void test_dict_put_number() {
     char *input_key = "yellow";
-    dict_value_t input_value = {
-        S_NUMBER,
-        {4300}
-    };
-    dict_value_t out_value;
-
-    dict_pos = 0;
-    dict_put(input_key, &input_value);
-    bool succ = dict_get(input_key, &out_value);
-    
-    assert(succ);
-    assert_value_number(input_value.u.number, &out_value);
-}
-
-static void test_dict_put_number_new_key() {
-    char *input_key = "golf";
     int input_number = 2000;
 
-    dict_pos = 0;
+    clear_array_for_test();
     dict_put_number(input_key, input_number);
 
-    dict_value_t out_value;
-    bool succ = dict_get(input_key, &out_value);
-
-    assert(succ);
-    assert(S_NUMBER == out_value.dtype);
-    assert(input_number == out_value.u.number);
+    assert_1st_node(input_key, input_number);
 }
 
 static void test_dict_get_number() {
-    char *input_key = "pink";
-    int input_number = 3000;
+    char *input_key = "yellow";
+    int input_number = 2000;
 
-    dict_pos = 0;
+    clear_array_for_test();
     dict_put_number(input_key, input_number);
+
     int actual_number = dict_get_number(input_key);
 
     assert(input_number == actual_number);
 }
 
+
 #if 0
 int main() {
-    test_dict_put_new_key();
-    test_dict_put_used_key();
-    test_dict_put_number_new_key();
-    test_dict_get_elem();
+    test_insert_node();
+    test_update_node();
     test_dict_get_number();
+    test_dict_put_number();
 
-    dict_print_all();
     return 0;
 }
 #endif

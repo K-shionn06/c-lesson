@@ -43,7 +43,7 @@ void eval() {
                     else if (streq("def", token.u.name)) {
                         execute_def();
                     }
-                    else if (-1 != dict_get_idx(token.u.name)) {
+                    else if (dict_key_isused(token.u.name)) {
                         int number = dict_get_number(token.u.name);
                         stack_push_number(number);
                     }
