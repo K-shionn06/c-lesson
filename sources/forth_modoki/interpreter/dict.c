@@ -32,27 +32,27 @@ bool dict_key_isused(char *key) {
     return false;
 }
 
-void dict_array_set_key(int idx, char * key) {
+void dict_array_set_key(int idx, char *key) {
     dict_array[idx].key = key;
 }
 
-void dict_array_set_value(int idx, dict_value_t value) {
+void dict_array_set_value(int idx, dict_value_t *value) {
     assert( idx <= dict_pos );
 
-    switch (value.dtype) {
+    switch (value->dtype) {
         case S_NUMBER:
-            dict_array[idx].value.dtype = value.dtype;
-            dict_array[idx].value.u.number = value.u.number;
+            dict_array[idx].value.dtype = value->dtype;
+            dict_array[idx].value.u.number = value->u.number;
             break;
         case S_EXE_NAME:
         case S_LIT_NAME:
-            dict_array[idx].value.dtype = value.dtype;
-            dict_array[idx].value.u.name = value.u.name;
+            dict_array[idx].value.dtype = value->dtype;
+            dict_array[idx].value.u.name = value->u.name;
             break;
     }
 }
 
-void dict_reassign(char *key, dict_value_t value) {
+void dict_reassign(char *key, dict_value_t *value) {
     assert( dict_key_isused(key) );
 
     for (int i = 0; i < dict_pos; i++) {
@@ -62,7 +62,7 @@ void dict_reassign(char *key, dict_value_t value) {
     }
 }
 
-void dict_put(char *key, dict_value_t value) {
+void dict_put(char *key, dict_value_t *value) {
     assert(dict_pos < DICT_SIZE);
 
     if (dict_key_isused(key)) {
@@ -89,7 +89,7 @@ void dict_array_copy_value(int idx, dict_value_t *out_value) {
         }
 }
 
-bool dict_get(char *key, dict_value_t * out_value) {
+bool dict_get(char *key, dict_value_t *out_value) {
     for (int i = 0; i < dict_pos; i++) {
         if (streq(key, dict_array[i].key)) {
             dict_array_copy_value(i, out_value);
@@ -104,7 +104,7 @@ void dict_put_number(char *key, int data) {
     value.dtype = S_NUMBER;
     value.u.number = data;
 
-    dict_put(key, value);
+    dict_put(key, &value);
 }
 
 int dict_get_number(char *key) {
@@ -144,14 +144,14 @@ void dict_print_all() {
 /* UnitTests */
 
 
-void assert_value_number(dict_value_t *expect, dict_value_t *actual) {
+static void assert_value_number(dict_value_t *expect, dict_value_t *actual) {
     assert(S_NUMBER == expect->dtype);
 
     assert(expect->dtype == actual->dtype);
     assert(expect->u.number == actual->u.number);
 }
 
-void test_dict_put_new_key() {
+static void test_dict_put_new_key() {
     char *input_key = "banana";
     dict_value_t input_value = {
         S_NUMBER,
@@ -159,13 +159,13 @@ void test_dict_put_new_key() {
     };
 
     dict_pos = 0;
-    dict_put(input_key, input_value);
+    dict_put(input_key, &input_value);
 
     assert(input_key == dict_array[0].key);
     assert_value_number(&input_value, &dict_array[0].value);
 }
 
-void test_dict_put_used_key() {
+static void test_dict_put_used_key() {
     char *input_key = "blue";
     dict_value_t input_value1 = {
         S_NUMBER,
@@ -177,13 +177,13 @@ void test_dict_put_used_key() {
     };
 
     dict_pos = 0;
-    dict_put(input_key, input_value1);
-    dict_put(input_key, input_value2);
+    dict_put(input_key, &input_value1);
+    dict_put(input_key, &input_value2);
 
     assert_value_number(&input_value2, &dict_array[0].value);
 }
 
-void test_dict_get_elem() {
+static void test_dict_get_elem() {
     char *input_key = "yellow";
     dict_value_t input_value = {
         S_NUMBER,
@@ -192,14 +192,14 @@ void test_dict_get_elem() {
     dict_value_t out_value;
 
     dict_pos = 0;
-    dict_put(input_key, input_value);
+    dict_put(input_key, &input_value);
     bool succ = dict_get(input_key, &out_value);
     
     assert(succ);
     assert_value_number(&input_value, &out_value);
 }
 
-void test_dict_put_number_new_key() {
+static void test_dict_put_number_new_key() {
     char *input_key = "golf";
     int input_number = 2000;
 
@@ -214,7 +214,7 @@ void test_dict_put_number_new_key() {
     assert(input_number == out_value.u.number);
 }
 
-void test_dict_get_number() {
+static void test_dict_get_number() {
     char *input_key = "pink";
     int input_number = 3000;
 
