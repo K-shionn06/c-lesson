@@ -63,14 +63,14 @@ void dict_array_set_value(int idx, dict_value_t *value) {
     }
 }
 
-void dict_reassign(char *key, dict_value_t *value) {
+static void dict_reassign(char *key, dict_value_t *value) {
     int idx = dict_get_idx(key);
     assert( -1 != idx );
 
     dict_array_set_value(idx, value);
 }
 
-void dict_put(char *key, dict_value_t *value) {
+static void dict_put(char *key, dict_value_t *value) {
     assert(dict_pos < DICT_SIZE);
 
     if (-1 != dict_get_idx(key)) {
@@ -83,7 +83,7 @@ void dict_put(char *key, dict_value_t *value) {
     }
 }
 
-void dict_array_copy_value(int idx, dict_value_t *out_value) {
+static void dict_array_copy_value(int idx, dict_value_t *out_value) {
         out_value->dtype = dict_array[idx].value.dtype;
 
         switch (out_value->dtype) {
@@ -97,7 +97,7 @@ void dict_array_copy_value(int idx, dict_value_t *out_value) {
         }
 }
 
-bool dict_get(char *key, dict_value_t *out_value) {
+static bool dict_get(char *key, dict_value_t *out_value) {
     int idx = dict_get_idx(key);
 
     if (-1 != idx) {
