@@ -144,11 +144,9 @@ void dict_print_all() {
 /* UnitTests */
 
 
-static void assert_value_number(dict_value_t *expect, dict_value_t *actual) {
-    assert(S_NUMBER == expect->dtype);
-
-    assert(expect->dtype == actual->dtype);
-    assert(expect->u.number == actual->u.number);
+static void assert_value_number(int expect, dict_value_t *actual) {
+    assert(S_NUMBER == actual->dtype);
+    assert(expect == actual->u.number);
 }
 
 static void test_dict_put_new_key() {
@@ -162,7 +160,7 @@ static void test_dict_put_new_key() {
     dict_put(input_key, &input_value);
 
     assert(input_key == dict_array[0].key);
-    assert_value_number(&input_value, &dict_array[0].value);
+    assert_value_number(input_value.u.number, &dict_array[0].value);
 }
 
 static void test_dict_put_used_key() {
@@ -180,7 +178,7 @@ static void test_dict_put_used_key() {
     dict_put(input_key, &input_value1);
     dict_put(input_key, &input_value2);
 
-    assert_value_number(&input_value2, &dict_array[0].value);
+    assert_value_number(input_value2.u.number, &dict_array[0].value);
 }
 
 static void test_dict_get_elem() {
@@ -196,7 +194,7 @@ static void test_dict_get_elem() {
     bool succ = dict_get(input_key, &out_value);
     
     assert(succ);
-    assert_value_number(&input_value, &out_value);
+    assert_value_number(input_value.u.number, &out_value);
 }
 
 static void test_dict_put_number_new_key() {
