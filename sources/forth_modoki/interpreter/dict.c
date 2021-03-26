@@ -24,12 +24,23 @@ bool streq(const char *s1, const char *s2) {
 /* core functions */
 
 
-bool dict_key_isused(char *key) {
+/*
+bool dict_get_idx(char *key, int *idx) {
     for (int i = 0; i < dict_pos; i++) {
         if (streq(key, dict_array[i].key))
+            *idx = i;
             return true;
     }
     return false;
+}
+*/
+
+int dict_get_idx(char *key) {
+    for (int i = 0; i < dict_pos; i++) {
+        if (streq(key, dict_array[i].key))
+            return i;
+    }
+    return -1; // -1 is impossible for array index
 }
 
 void dict_array_set_key(int idx, char *key) {
@@ -53,19 +64,16 @@ void dict_array_set_value(int idx, dict_value_t *value) {
 }
 
 void dict_reassign(char *key, dict_value_t *value) {
-    assert( dict_key_isused(key) );
+    int idx = dict_get_idx(key);
+    assert( -1 != idx );
 
-    for (int i = 0; i < dict_pos; i++) {
-        if (streq(key, dict_array[i].key)) {
-            dict_array_set_value(i, value);
-        }
-    }
+    dict_array_set_value(idx, value);
 }
 
 void dict_put(char *key, dict_value_t *value) {
     assert(dict_pos < DICT_SIZE);
 
-    if (dict_key_isused(key)) {
+    if (-1 != dict_get_idx(key)) {
         dict_reassign(key, value);
     }
     else {
@@ -90,13 +98,15 @@ void dict_array_copy_value(int idx, dict_value_t *out_value) {
 }
 
 bool dict_get(char *key, dict_value_t *out_value) {
-    for (int i = 0; i < dict_pos; i++) {
-        if (streq(key, dict_array[i].key)) {
-            dict_array_copy_value(i, out_value);
-            return true;
-        }
+    int idx = dict_get_idx(key);
+
+    if (-1 != idx) {
+        dict_array_copy_value(idx, out_value);
+        return true;
     }
-    return false;
+    else {
+        return false;
+    }
 }
 
 void dict_put_number(char *key, int data) {
