@@ -9,25 +9,25 @@
 #define TABLE_SIZE 1024
 
 struct Node {
-    char *key;
+    char* key;
     int value;
-    struct Node *next;
+    struct Node* next;
 };
 
-struct Node *array[TABLE_SIZE];
+struct Node* array[TABLE_SIZE];
 
 
 /* functions */
 
 
-bool streq(const char *s1, const char *s2) {
+bool streq(const char* s1, const char* s2) {
     if (0 == strcmp(s1, s2))
         return true;
     else
         return false;
 }
 
-static int hash(char *str) {
+static int hash(char* str) {
     unsigned int val = 0;
     while (*str) {
         val += *str++;
@@ -35,9 +35,9 @@ static int hash(char *str) {
     return (int)(val % 1024);
 }
 
-static struct Node * make_new_node(char *key, int value) {
-    struct Node *node;
-    node = (struct Node *)malloc(sizeof(struct Node));
+static struct Node* make_new_node(char* key, int value) {
+    struct Node* node;
+    node = (struct Node*)malloc(sizeof(struct Node));
 
     node->key = key;
     node->value = value;
@@ -45,8 +45,8 @@ static struct Node * make_new_node(char *key, int value) {
     return node;
 }
 
-static struct Node * get_end_node(struct Node *head) {
-    struct Node *node;
+static struct Node* get_end_node(struct Node* head) {
+    struct Node* node;
     node = head;
 
     while (true) {
@@ -57,8 +57,8 @@ static struct Node * get_end_node(struct Node *head) {
     }
 }
 
-static struct Node * search_node_by_key(struct Node *head, char *key) {
-    struct Node *node;
+static struct Node* search_node_by_key(struct Node* head, char* key) {
+    struct Node* node;
     node = head;
 
     while (NULL != node) {
@@ -71,24 +71,24 @@ static struct Node * search_node_by_key(struct Node *head, char *key) {
     return NULL;
 }
 
-static void update_node(struct Node *head, char *key, int value) {
-    struct Node *node;
+static void update_node(struct Node* head, char* key, int value) {
+    struct Node* node;
     node = search_node_by_key(head, key);
     assert(NULL != node);
 
     node->value = value;
 }
 
-static void insert_node(struct Node *head, char *key, int value) {
-    struct Node *node;
+static void insert_node(struct Node* head, char* key, int value) {
+    struct Node* node;
     node = get_end_node(head);
     assert(node != NULL);
 
     node->next = make_new_node(key, value);
 }
 
-static void update_or_insert_list(int idx, char *key, int value) {
-    struct Node *node;
+static void update_or_insert_list(int idx, char* key, int value) {
+    struct Node* node;
     node = search_node_by_key(array[idx], key);
     assert(NULL != node);
 
@@ -100,7 +100,7 @@ static void update_or_insert_list(int idx, char *key, int value) {
     }
 }
 
-bool dict_key_isused(char *key) {
+bool dict_key_isused(char* key) {
     int idx = hash(key);
 
     if (NULL != search_node_by_key(array[idx], key))
@@ -109,7 +109,7 @@ bool dict_key_isused(char *key) {
         return false;
 }
 
-void dict_put_number(char *key, int value) {
+void dict_put_number(char* key, int value) {
     int idx = hash(key);
 
     if (NULL == array[idx]) {
@@ -120,9 +120,9 @@ void dict_put_number(char *key, int value) {
     }
 }
 
-int dict_get_number(char *key) {
+int dict_get_number(char* key) {
     int idx = hash(key);
-    struct Node *node;
+    struct Node* node;
     node = search_node_by_key(array[idx], key);
 
     return node->value;
@@ -140,14 +140,14 @@ static void clear_array_for_test() {
     }
 }
 
-static void assert_1st_node(char *expect_key, int expect_value) {
+static void assert_1st_node(char* expect_key, int expect_value) {
     int idx = hash(expect_key);
 
     assert(streq(expect_key, array[idx]->key));
     assert(expect_value == array[idx]->value);
 }
 
-static void assert_2nd_node(char *expect_key, int expect_value) {
+static void assert_2nd_node(char* expect_key, int expect_value) {
     int idx = hash(expect_key);
 
     assert(streq(expect_key, array[idx]->next->key));
@@ -155,7 +155,7 @@ static void assert_2nd_node(char *expect_key, int expect_value) {
 }
 
 static void test_update_node() {
-    char *input_key = "apple";
+    char* input_key = "apple";
     int input_idx = hash(input_key);
     int input_number = 2000;
     int expect_number = 3000; 
@@ -171,8 +171,8 @@ static void test_update_node() {
 static void test_insert_node() {
     // This test depends on hash function
 
-    char *input_key1 = "abc";
-    char *input_key2 = "cba";
+    char* input_key1 = "abc";
+    char* input_key2 = "cba";
     int input_idx = hash(input_key1);
     int input_number1 = 2000;
     int input_number2 = 3000; 
@@ -180,14 +180,14 @@ static void test_insert_node() {
     clear_array_for_test();
     array[input_idx] = make_new_node(input_key1, input_number1);
 
-    assert(array[input_idx] != NULL);
+    assert(NULL != array[input_idx]);
     insert_node(array[input_idx], input_key2, input_number2);
 
     assert_2nd_node(input_key2, input_number2);
 }
 
 static void test_dict_put_number() {
-    char *input_key = "yellow";
+    char* input_key = "yellow";
     int input_number = 2000;
 
     clear_array_for_test();
@@ -197,7 +197,7 @@ static void test_dict_put_number() {
 }
 
 static void test_dict_get_number() {
-    char *input_key = "yellow";
+    char* input_key = "yellow";
     int input_number = 2000;
 
     clear_array_for_test();

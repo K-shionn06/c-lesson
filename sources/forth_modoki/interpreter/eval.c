@@ -1,5 +1,6 @@
 #include "clesson.h"
 #include "parser.h"
+#include "stack.h"
 #include "dict.h"
 
 #include <stdio.h>
