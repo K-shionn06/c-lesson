@@ -18,4 +18,4 @@ struct Token {
     } u;
 };
 
-int parse_one(int, struct Token *);
+int parse_one(int, struct Token*);

@@ -9,14 +9,14 @@
 
 #define NAME_SIZE 256
 
-bool _isdigit(int c) {
+static bool _isdigit(int c) {
     if (('0' <= c) && ('9' >= c))
         return true;
     
     return false;
 }
 
-bool _isalpha(int c) {
+static bool _isalpha(int c) {
     if (('A' <= c) && ('Z' >= c))
         return true;
     if (('a' <= c) && ('z' >= c))
@@ -25,7 +25,7 @@ bool _isalpha(int c) {
     return false;
 }
 
-bool _isname(int c) {
+static bool _isname(int c) {
     if (_isdigit(c) || _isalpha(c))
         return true;
     if (('-' == c) || ('_' == c))
@@ -34,7 +34,7 @@ bool _isname(int c) {
     return false;
 }
 
-int parse_one(int prev_ch, struct Token *out_token) {
+int parse_one(int prev_ch, struct Token* out_token) {
     int c;
 
     if (EOF == prev_ch)
@@ -104,7 +104,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
             }
             else {
                 out_token->ltype = EXECUTABLE_NAME;
-                out_token->u.name = (char *)malloc(i + 1);
+                out_token->u.name = (char*)malloc(i + 1);
                 strcpy(out_token->u.name, name_p);
 
                 return c;
@@ -125,7 +125,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
             }
             else {
                 out_token->ltype = LITERAL_NAME;
-                out_token->u.name = (char *)malloc(i + 1);
+                out_token->u.name = (char*)malloc(i + 1);
                 strcpy(out_token->u.name, name_p);
 
                 return c;
@@ -140,12 +140,11 @@ int parse_one(int prev_ch, struct Token *out_token) {
         return EOF;
     }
 
-
     out_token->ltype = UNKNOWN;
     return EOF;
 }
 
-void parser_print_all() {
+static void parser_print_all() {
     int ch = EOF;
     struct Token token = {
         UNKNOWN,
@@ -188,7 +187,7 @@ void parser_print_all() {
 
 
 static void test_parse_one_number() {
-    char *input = "123";
+    char* input = "123";
     int expect = 123;
 
     struct Token token = {UNKNOWN, {0}};
@@ -204,7 +203,7 @@ static void test_parse_one_number() {
 }
 
 static void test_parse_one_empty_should_return_END_OF_FILE() {
-    char *input = "";
+    char* input = "";
     int expect = END_OF_FILE;
 
     struct Token token = {UNKNOWN, {0}};
@@ -218,8 +217,8 @@ static void test_parse_one_empty_should_return_END_OF_FILE() {
 }
 
 static void test_parse_one_executable_name() {
-    char *input = "add123";
-    char *expect_name = "add123";
+    char* input = "add123";
+    char* expect_name = "add123";
     int expect_type = EXECUTABLE_NAME;
 
     struct Token token = {UNKNOWN, {0}};
@@ -234,8 +233,8 @@ static void test_parse_one_executable_name() {
 }
 
 static void test_parse_one_literal_name() {
-    char *input = "/add123";
-    char *expect_name = "add123";
+    char* input = "/add123";
+    char* expect_name = "add123";
     int expect_type = LITERAL_NAME;
 
     struct Token token = {UNKNOWN, {0}};
@@ -250,7 +249,7 @@ static void test_parse_one_literal_name() {
 }
 
 static void test_parse_one_open_curly() {
-    char *input = "{";
+    char* input = "{";
     char expect_onechar = '{';
     int expect_type = OPEN_CURLY;
 
@@ -266,7 +265,7 @@ static void test_parse_one_open_curly() {
 }
 
 static void test_parse_one_close_curly() {
-    char *input = "}";
+    char* input = "}";
     char expect_onechar = '}';
     int expect_type = CLOSE_CURLY;
 
