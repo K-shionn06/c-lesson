@@ -22,6 +22,11 @@ static void execute_def() {
     dict_put_number(lit_name, number);
 }
 
+static void register_primitives() {
+    dict_put_cfunc("add", execute_add);
+    dict_put_cfunc("def", execute_def);
+}
+
 void eval() {
     int ch = EOF;
     struct Token token = {
@@ -38,15 +43,14 @@ void eval() {
                     break;
 
                 case EXECUTABLE_NAME:
-                    if (streq("add", token.u.name)) {
-                        execute_add();
-                    }
-                    else if (streq("def", token.u.name)) {
-                        execute_def();
-                    }
-                    else if (dict_key_isused(token.u.name)) {
-                        int number = dict_get_number(token.u.name);
-                        stack_push_number(number);
+                    if (dict_key_isused(token.u.name)) {
+                        struct D_ElemValue* value;
+                        value = dict_get(token.u.name);
+                        
+                        if (V_C_FUNC == value->vtype)
+                            value->u.cfunc();
+                        else
+                            stack_push_number(value->u.number);
                     }
                     else {
                         assert(false);
@@ -134,6 +138,7 @@ static void test_eval_def() {
 }
 
 int main() {
+    register_primitives();
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
