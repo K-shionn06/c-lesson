@@ -71,43 +71,43 @@ static struct D_Elem* search_elem_by_key(struct D_Elem* head_elem, char* key) {
     return NULL;
 }
 
-static void insert_elem(struct D_Elem* head_elem, char* key, struct D_ElemValue* value) {
-    struct D_Elem* next_elem;
-    next_elem = head_elem->next;
-    head_elem->next = new_elem(key, value);
+static void insert_elem(int idx, char* key, struct D_ElemValue* value) {
+    struct D_Elem* head_elem;
+    head_elem = array[idx];
 
-    if (NULL != next_elem)
-        head_elem->next->next = next_elem;
+    assert(NULL != head_elem);
+
+    array[idx] = new_elem(key, value);
+    array[idx]->next = head_elem;
 }
 
-static void update_elem(struct D_Elem* head_elem, char* key, struct D_ElemValue* value) {
+static void update_elem(int idx, char* key, struct D_ElemValue* value) {
     struct D_Elem* elem;
-    elem = search_elem_by_key(head_elem, key);
+    elem = search_elem_by_key(array[idx], key);
 
     assert(NULL != elem);
 
     copy_elem_value(&elem->value, value);
 }
 
-static void update_or_insert_elem(struct D_Elem* head_elem, char* key, struct D_ElemValue* value) {
+static void update_or_insert_elem(int idx, char* key, struct D_ElemValue* value) {
     struct D_Elem* elem;
-    elem = search_elem_by_key(head_elem, key);
+    elem = search_elem_by_key(array[idx], key);
 
     if (NULL == elem)
-        insert_elem(head_elem, key, value);
+        insert_elem(idx, key, value);
     else
-        update_elem(head_elem, key, value);
+        update_elem(idx, key, value);
 }
 
 static void dict_put(char* key, struct D_ElemValue* value) {
     int idx = hash(key);
-    struct D_Elem* head_elem = array[idx];
 
-    if (NULL == head_elem) {
+    if (NULL == array[idx]) {
         array[idx] = new_elem(key, value);
     }
     else {
-        update_or_insert_elem(head_elem, key, value);
+        update_or_insert_elem(idx, key, value);
     }
 }
 
@@ -160,7 +160,7 @@ static void clear_array_for_test() {
     }
 }
 
-static void test_dict_put_type_number() {
+static void test_dict_put_number() {
     char* input_key = "yellow";
     int idx = hash(input_key);
     int input_number = 2000;
@@ -172,11 +172,30 @@ static void test_dict_put_type_number() {
     assert(input_number == array[idx]->value.u.number);
 }
 
-void sample_cfunc() {
+static void test_dict_put_number_same_hash_two_numbers() {
+    char* input_key1 = "abc";
+    char* input_key2 = "cba";
+    int idx = hash(input_key1);
+    int input_number1 = 100;
+    int input_number2 = 200;
+
+    assert(hash(input_key1) == hash(input_key2));
+
+    clear_array_for_test();
+    dict_put_number(input_key1, input_number1);
+    dict_put_number(input_key2, input_number2);
+
+    assert(V_NUMBER == array[idx]->next->value.vtype);
+    assert(V_NUMBER == array[idx]->value.vtype);
+    assert(input_number1 == array[idx]->next->value.u.number);
+    assert(input_number2 == array[idx]->value.u.number);
+}
+
+static void sample_cfunc() {
     puts("hello cfunc");
 }
 
-static void test_dict_put_type_cfunc() {
+static void test_dict_put_cfunc() {
     char* input_key = "pen";
     int idx = hash(input_key);
     void (* input_func)() = sample_cfunc;
@@ -200,6 +219,27 @@ static void test_dict_get_type_number() {
     assert(input_number == value->u.number);
 }
 
+static void test_dict_get_type_number_same_hash_two_numbers() {
+    char* input_key1 = "abc";
+    char* input_key2 = "cba";
+    int input_number1 = 100;
+    int input_number2 = 200;
+
+    assert(hash(input_key1) == hash(input_key2));
+
+    clear_array_for_test();
+    dict_put_number(input_key1, input_number1);
+    dict_put_number(input_key2, input_number2);
+
+    struct D_ElemValue* value1 = dict_get(input_key1);
+    struct D_ElemValue* value2 = dict_get(input_key2);
+
+    assert(V_NUMBER == value1->vtype);
+    assert(V_NUMBER == value2->vtype);
+    assert(input_number1 == value1->u.number);
+    assert(input_number2 == value2->u.number);
+}
+
 static void test_dict_get_type_cfunc() {
     char* input_key = "pen";
     void (* input_func)() = sample_cfunc;
@@ -212,13 +252,14 @@ static void test_dict_get_type_cfunc() {
     assert(input_func == value->u.cfunc);
 }
 
-#if 0
+
 int main() {
-    test_dict_put_type_number();
-    test_dict_put_type_cfunc();
+    test_dict_put_number();
+    test_dict_put_number_same_hash_two_numbers();
+    test_dict_put_cfunc();
     test_dict_get_type_number();
+    test_dict_get_type_number_same_hash_two_numbers();
     test_dict_get_type_cfunc();
 
     return 0;
 }
-#endif
