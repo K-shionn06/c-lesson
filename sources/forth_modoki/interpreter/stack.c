@@ -7,25 +7,9 @@
 
 #define STACK_SIZE 1024
 
-enum StackDataType {
-    S_NUMBER,
-    S_EXE_NAME,
-    S_LIT_NAME
-};
-
-union StackData {
-    int number;
-    char* name;
-};
-
-struct StackElement {
-    enum StackDataType dtype;
-    union StackData u;
-};
-
 struct Stack {
     unsigned int pos;
-    struct StackElement body[STACK_SIZE];
+    struct S_Element array[STACK_SIZE];
 };
 
 
@@ -37,8 +21,8 @@ struct Stack global_stack;
 
 static void stack_clear() {
     for (int i = 0; i < STACK_SIZE; i++) {
-        global_stack.body[i].dtype = S_NUMBER;
-        global_stack.body[i].u.number = 0;
+        global_stack.array[i].dtype = S_NUMBER;
+        global_stack.array[i].u.number = 0;
     }
     global_stack.pos = 0;
 }
@@ -60,17 +44,17 @@ static bool stack_isempty() {
 void stack_push_number(int data) {
     assert( !stack_isfull() );
 
-    global_stack.body[global_stack.pos].dtype = S_NUMBER;
-    global_stack.body[global_stack.pos].u.number = data;
+    global_stack.array[global_stack.pos].dtype = S_NUMBER;
+    global_stack.array[global_stack.pos].u.number = data;
     global_stack.pos++;
 }
 
-static void stack_push_string(enum StackDataType dtype, char* data) {
+static void stack_push_string(enum S_ElementDataType dtype, char* data) {
     assert( !stack_isfull() );
     assert((S_EXE_NAME == dtype) || (S_LIT_NAME == dtype));
 
-    global_stack.body[global_stack.pos].dtype = dtype;
-    global_stack.body[global_stack.pos].u.name = data;
+    global_stack.array[global_stack.pos].dtype = dtype;
+    global_stack.array[global_stack.pos].u.name = data;
     global_stack.pos++;
 }
 
@@ -81,25 +65,25 @@ void stack_push_lit_name(char* data) {
     stack_push_string(S_LIT_NAME, data);
 }
 
-static void stack_pop(struct StackElement* out_elem) {
+static void stack_pop(struct S_Element* out_elem) {
     assert( !stack_isempty() );
 
     global_stack.pos--;
-    out_elem->dtype = global_stack.body[global_stack.pos].dtype;
+    out_elem->dtype = global_stack.array[global_stack.pos].dtype;
 
     switch (out_elem->dtype) {
         case S_NUMBER:
-            out_elem->u.number = global_stack.body[global_stack.pos].u.number;
+            out_elem->u.number = global_stack.array[global_stack.pos].u.number;
             break;
         case S_EXE_NAME:
         case S_LIT_NAME:
-            out_elem->u.name = global_stack.body[global_stack.pos].u.name;
+            out_elem->u.name = global_stack.array[global_stack.pos].u.name;
             break;
     }
 }
 
 int stack_pop_number() {
-    struct StackElement elem;
+    struct S_Element elem;
     stack_pop(&elem);
 
     assert(S_NUMBER == elem.dtype);
@@ -107,10 +91,10 @@ int stack_pop_number() {
     return elem.u.number;
 }
 
-static char* stack_pop_string(enum StackDataType dtype) {
+static char* stack_pop_string(enum S_ElementDataType dtype) {
     assert((S_EXE_NAME == dtype) || (S_LIT_NAME == dtype));
 
-    struct StackElement elem;
+    struct S_Element elem;
     stack_pop(&elem);
 
     assert(dtype == elem.dtype);
@@ -130,14 +114,14 @@ void stack_print_all() {
     int i;
     puts("-----------------------------");
     for (i = STACK_SIZE-1; i >= 0; i--) {
-        switch (global_stack.body[i].dtype) {
+        switch (global_stack.array[i].dtype) {
             case S_NUMBER:
-                printf("     | %014d |\n", global_stack.body[i].u.number);
+                printf("     | %014d |\n", global_stack.array[i].u.number);
                 break;
             case S_EXE_NAME:
             case S_LIT_NAME:
-                printf("     | %p | -> %s\n", global_stack.body[i].u.name,
-                                                global_stack.body[i].u.name);
+                printf("     | %p | -> %s\n", global_stack.array[i].u.name,
+                                                global_stack.array[i].u.name);
                 break;
         }
         printf("%04d |----------------|\n", i);
@@ -155,8 +139,8 @@ static void test_stack_push_number_123() {
     stack_clear();
     stack_push_number(input);
 
-    assert(S_NUMBER == global_stack.body[0].dtype);
-    assert(input == global_stack.body[0].u.number);
+    assert(S_NUMBER == global_stack.array[0].dtype);
+    assert(input == global_stack.array[0].u.number);
 }
 
 static void test_stack_push_string_as_exe() {
@@ -165,8 +149,8 @@ static void test_stack_push_string_as_exe() {
     stack_clear();
     stack_push_string(S_EXE_NAME, input);
 
-    assert(S_EXE_NAME == global_stack.body[0].dtype);
-    assert(0 == strcmp(input, global_stack.body[0].u.name));
+    assert(S_EXE_NAME == global_stack.array[0].dtype);
+    assert(0 == strcmp(input, global_stack.array[0].u.name));
 }
 
 static void test_stack_push_string_as_lit() {
@@ -175,14 +159,14 @@ static void test_stack_push_string_as_lit() {
     stack_clear();
     stack_push_string(S_LIT_NAME, input);
 
-    assert(S_LIT_NAME == global_stack.body[0].dtype);
-    assert(0 == strcmp(input, global_stack.body[0].u.name));
+    assert(S_LIT_NAME == global_stack.array[0].dtype);
+    assert(0 == strcmp(input, global_stack.array[0].u.name));
 }
 
 static void test_stack_pop_when_empty() {
     // This should fail
 
-    struct StackElement elem;
+    struct S_Element elem;
 
     stack_clear();
     stack_pop(&elem);
