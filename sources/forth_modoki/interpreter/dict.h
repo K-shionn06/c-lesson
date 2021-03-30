@@ -13,20 +13,6 @@ struct D_ElemValue {
     } u;
 };
 
-struct D_Elem {
-    char* key;
-    struct D_ElemValue value;
-    struct D_Elem* next;
-};
-
-/*
-struct Node {
-    char* key;
-    struct NodeValue value;
-    struct Node* next;
-};
-*/
-
 bool streq(const char* s1, const char* s2);
 
 bool dict_key_isused(char* key);

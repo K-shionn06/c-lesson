@@ -8,6 +8,12 @@
 
 #define TABLE_SIZE 1024
 
+struct D_Elem {
+    char* key;
+    struct D_ElemValue value;
+    struct D_Elem* next;
+};
+
 
 struct D_Elem* array[TABLE_SIZE];
 
@@ -253,6 +259,7 @@ static void test_dict_get_type_cfunc() {
 }
 
 
+#if 0
 int main() {
     test_dict_put_number();
     test_dict_put_number_same_hash_two_numbers();
@@ -263,3 +270,4 @@ int main() {
 
     return 0;
 }
+#endif
