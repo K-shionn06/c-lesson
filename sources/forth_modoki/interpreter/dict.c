@@ -8,14 +8,14 @@
 
 #define TABLE_SIZE 1024
 
-struct D_Elem {
+struct D_ArrayElement {
     char* key;
-    struct D_ElemValue value;
-    struct D_Elem* next;
+    struct D_Element elem;
+    struct D_ArrayElement* next;
 };
 
 
-struct D_Elem* array[TABLE_SIZE];
+struct D_ArrayElement* array[TABLE_SIZE];
 
 
 /* functions */
@@ -33,122 +33,121 @@ static int hash(char* str) {
     while (*str) {
         val += *str++;
     }
-    return (int)(val % 1024);
+    return (int)(val % TABLE_SIZE);
 }
 
-static void copy_elem_value(struct D_ElemValue* dest_value, struct D_ElemValue* src_value) {
-    dest_value->vtype = src_value->vtype;
+static void copy_element(struct D_Element* dest, struct D_Element* src) {
+    dest->dtype = src->dtype;
 
-    switch (src_value->vtype) {
+    switch (src->dtype) {
         default:
             assert(false);
 
-        case V_NUMBER:
-            dest_value->u.number = src_value->u.number;
+        case D_NUMBER:
+            dest->u.number = src->u.number;
             break;
-        case V_C_FUNC:
-            dest_value->u.cfunc = src_value->u.cfunc;
+        case D_C_FUNC:
+            dest->u.cfunc = src->u.cfunc;
             break;
     }
 }
 
-static struct D_Elem* new_elem(char* key, struct D_ElemValue* value) {
-    struct D_Elem* elem;
-    elem = (struct D_Elem*)malloc(sizeof(struct D_Elem));
+static struct D_ArrayElement* new_ary_elem(char* key, struct D_Element* elem) {
+    struct D_ArrayElement* new_ary_elem;
+    new_ary_elem = (struct D_ArrayElement*)malloc(sizeof(struct D_ArrayElement));
 
-    elem->key = key;
-    copy_elem_value(&elem->value, value);
-    elem->next = NULL;
+    new_ary_elem->key = key;
+    copy_element(&new_ary_elem->elem, elem);
+    new_ary_elem->next = NULL;
 
-    return elem;
+    return new_ary_elem;
 }
 
-static struct D_Elem* search_elem_by_key(struct D_Elem* head_elem, char* key) {
-    struct D_Elem* elem;
-    elem = head_elem;
+static struct D_ArrayElement* search_ary_elem_by_key(
+    struct D_ArrayElement* head_ary_elem,
+    char* key)
+{
+    struct D_ArrayElement* ary_elem = head_ary_elem;
 
-    while (NULL != elem) {
-        if (streq(key, elem->key))
-            return elem;
+    while (NULL != ary_elem) {
+        if (streq(key, ary_elem->key))
+            return ary_elem;
         else
-            elem = elem->next;
+            ary_elem = ary_elem->next;
     }
 
     return NULL;
 }
 
-static void insert_elem(int idx, char* key, struct D_ElemValue* value) {
-    struct D_Elem* head_elem;
-    head_elem = array[idx];
+static void insert_ary_elem(int idx, char* key, struct D_Element* elem) {
+    struct D_ArrayElement* head_ary_elem = array[idx];
 
-    assert(NULL != head_elem);
+    assert(NULL != head_ary_elem);
 
-    array[idx] = new_elem(key, value);
-    array[idx]->next = head_elem;
+    array[idx] = new_ary_elem(key, elem);
+    array[idx]->next = head_ary_elem;
 }
 
-static void update_elem(int idx, char* key, struct D_ElemValue* value) {
-    struct D_Elem* elem;
-    elem = search_elem_by_key(array[idx], key);
+static void update_ary_elem(
+    struct D_ArrayElement* found_ary_elem,
+    struct D_Element* elem)
+{
+    assert(NULL != found_ary_elem);
 
-    assert(NULL != elem);
-
-    copy_elem_value(&elem->value, value);
+    copy_element(&found_ary_elem->elem, elem);
 }
 
-static void update_or_insert_elem(int idx, char* key, struct D_ElemValue* value) {
-    struct D_Elem* elem;
-    elem = search_elem_by_key(array[idx], key);
+static void update_or_insert_ary_elem(int idx, char* key, struct D_Element* elem) {
+    struct D_ArrayElement* ary_elem = search_ary_elem_by_key(array[idx], key);
 
-    if (NULL == elem)
-        insert_elem(idx, key, value);
+    if (NULL == ary_elem)
+        insert_ary_elem(idx, key, elem);
     else
-        update_elem(idx, key, value);
+        update_ary_elem(ary_elem, elem);
 }
 
-static void dict_put(char* key, struct D_ElemValue* value) {
+static void dict_put(char* key, struct D_Element* elem) {
     int idx = hash(key);
 
     if (NULL == array[idx]) {
-        array[idx] = new_elem(key, value);
+        array[idx] = new_ary_elem(key, elem);
     }
     else {
-        update_or_insert_elem(idx, key, value);
+        update_or_insert_ary_elem(idx, key, elem);
     }
 }
 
 void dict_put_number(char* key, int number) {
-    struct D_ElemValue value;
-    value.vtype = V_NUMBER;
-    value.u.number = number;
+    struct D_Element elem = {
+        .dtype = D_NUMBER,
+        .u.number = number
+    };
 
-    dict_put(key, &value);
+    dict_put(key, &elem);
 }
 
 void dict_put_cfunc(char* key, void (*cfunc)()) {
-    struct D_ElemValue value;
-    value.vtype = V_C_FUNC;
-    value.u.cfunc = cfunc;
+    struct D_Element elem = {
+        .dtype = D_C_FUNC,
+        .u.cfunc = cfunc
+    };
 
-    dict_put(key, &value);
+    dict_put(key, &elem);
 }
 
-struct D_ElemValue* dict_get(char* key) {
+struct D_Element* dict_get(char* key) {
     int idx = hash(key);
 
-    struct D_Elem* head_elem;
-    struct D_Elem* elem;
-    head_elem = array[idx];
-    elem = search_elem_by_key(head_elem, key);
+    struct D_ArrayElement* ary_elem = search_ary_elem_by_key(array[idx], key);
 
-    return &elem->value;
+    return &ary_elem->elem;
 }
 
 bool dict_key_isused(char* key) {
     int idx = hash(key);
-    struct D_Elem* elem = search_elem_by_key(array[idx], key);
+    struct D_ArrayElement* ary_elem = search_ary_elem_by_key(array[idx], key);
 
-    if (NULL != elem)
+    if (NULL != ary_elem)
         return true;
     else
         return false;
@@ -158,10 +157,19 @@ bool dict_key_isused(char* key) {
 /* unit test */
 
 
-static void clear_array_for_test() {
-    // This function only for test
+static void clear_array() {
+    struct D_ArrayElement *ary_elem, *nxt_ary_elem;
 
     for (int i = 0; i < TABLE_SIZE; i++) {
+        if (NULL == array[i])
+             continue;
+
+        ary_elem = array[i];
+        while (NULL != ary_elem) {
+            nxt_ary_elem = ary_elem->next;
+            free(ary_elem);
+            ary_elem = nxt_ary_elem;
+        }
         array[i] = NULL;
     }
 }
@@ -171,11 +179,11 @@ static void test_dict_put_number() {
     int idx = hash(input_key);
     int input_number = 2000;
 
-    clear_array_for_test();
+    clear_array();
     dict_put_number(input_key, input_number);
 
-    assert(V_NUMBER == array[idx]->value.vtype);
-    assert(input_number == array[idx]->value.u.number);
+    assert(D_NUMBER == array[idx]->elem.dtype);
+    assert(input_number == array[idx]->elem.u.number);
 }
 
 static void test_dict_put_number_same_hash_two_numbers() {
@@ -187,14 +195,14 @@ static void test_dict_put_number_same_hash_two_numbers() {
 
     assert(hash(input_key1) == hash(input_key2));
 
-    clear_array_for_test();
+    clear_array();
     dict_put_number(input_key1, input_number1);
     dict_put_number(input_key2, input_number2);
 
-    assert(V_NUMBER == array[idx]->next->value.vtype);
-    assert(V_NUMBER == array[idx]->value.vtype);
-    assert(input_number1 == array[idx]->next->value.u.number);
-    assert(input_number2 == array[idx]->value.u.number);
+    assert(D_NUMBER == array[idx]->next->elem.dtype);
+    assert(D_NUMBER == array[idx]->elem.dtype);
+    assert(input_number1 == array[idx]->next->elem.u.number);
+    assert(input_number2 == array[idx]->elem.u.number);
 }
 
 static void sample_cfunc() {
@@ -206,23 +214,23 @@ static void test_dict_put_cfunc() {
     int idx = hash(input_key);
     void (* input_func)() = sample_cfunc;
 
-    clear_array_for_test();
+    clear_array();
     dict_put_cfunc(input_key, input_func);
 
-    assert(V_C_FUNC == array[idx]->value.vtype);
-    assert(input_func == array[idx]->value.u.cfunc);
+    assert(D_C_FUNC == array[idx]->elem.dtype);
+    assert(input_func == array[idx]->elem.u.cfunc);
 }
 
 static void test_dict_get_type_number() {
     char* input_key = "yellow";
     int input_number = 2000;
 
-    clear_array_for_test();
+    clear_array();
     dict_put_number(input_key, input_number);
-    struct D_ElemValue* value = dict_get(input_key);
+    struct D_Element* elem = dict_get(input_key);
 
-    assert(V_NUMBER == value->vtype);
-    assert(input_number == value->u.number);
+    assert(D_NUMBER == elem->dtype);
+    assert(input_number == elem->u.number);
 }
 
 static void test_dict_get_type_number_same_hash_two_numbers() {
@@ -233,33 +241,32 @@ static void test_dict_get_type_number_same_hash_two_numbers() {
 
     assert(hash(input_key1) == hash(input_key2));
 
-    clear_array_for_test();
+    clear_array();
     dict_put_number(input_key1, input_number1);
     dict_put_number(input_key2, input_number2);
 
-    struct D_ElemValue* value1 = dict_get(input_key1);
-    struct D_ElemValue* value2 = dict_get(input_key2);
+    struct D_Element* elem1 = dict_get(input_key1);
+    struct D_Element* elem2 = dict_get(input_key2);
 
-    assert(V_NUMBER == value1->vtype);
-    assert(V_NUMBER == value2->vtype);
-    assert(input_number1 == value1->u.number);
-    assert(input_number2 == value2->u.number);
+    assert(D_NUMBER == elem1->dtype);
+    assert(D_NUMBER == elem2->dtype);
+    assert(input_number1 == elem1->u.number);
+    assert(input_number2 == elem2->u.number);
 }
 
 static void test_dict_get_type_cfunc() {
     char* input_key = "pen";
     void (* input_func)() = sample_cfunc;
 
-    clear_array_for_test();
+    clear_array();
     dict_put_cfunc(input_key, input_func);
-    struct D_ElemValue* value = dict_get(input_key);
+    struct D_Element* elem = dict_get(input_key);
 
-    assert(V_C_FUNC == value->vtype);
-    assert(input_func == value->u.cfunc);
+    assert(D_C_FUNC == elem->dtype);
+    assert(input_func == elem->u.cfunc);
 }
 
 
-#if 0
 int main() {
     test_dict_put_number();
     test_dict_put_number_same_hash_two_numbers();
@@ -270,4 +277,3 @@ int main() {
 
     return 0;
 }
-#endif
