@@ -1,5 +1,8 @@
 #include <stdbool.h>
 
+#ifndef DICT_H
+#define DICT_H
+
 enum D_ElementDataType {
     D_NUMBER,
     D_C_FUNC
@@ -23,3 +26,5 @@ void dict_put_number(char* key, int number);
 void dict_put_cfunc(char* key, void (*cfunc)());
 
 struct D_Element* dict_get(char* key);
+
+#endif

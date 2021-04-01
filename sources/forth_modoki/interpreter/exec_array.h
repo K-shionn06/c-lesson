@@ -1,3 +1,6 @@
+#ifndef EXEC_ARRAY_H
+#define EXEC_ARRAY_H
+
 enum EA_ElementDataType {
     EA_NUMBER,
     EA_EXE_NAME,
@@ -20,3 +23,5 @@ struct EA_Element {
 
 
 void compile_exec_array(struct EA_Element* out_element);
+
+#endif

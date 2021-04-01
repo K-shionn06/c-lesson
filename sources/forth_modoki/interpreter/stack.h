@@ -1,7 +1,11 @@
+#ifndef STACK_H
+#define STACK_H
+
 enum S_ElementDataType {
     S_NUMBER,
     S_EXE_NAME,
     S_LIT_NAME,
+    S_BYTE_CODES,
 };
 
 union S_ElementData {
@@ -23,3 +27,5 @@ char* stack_pop_exe_name();
 char* stack_pop_lit_name();
 
 void stack_print_all();
+
+#endif
