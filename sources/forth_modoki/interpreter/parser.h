@@ -1,3 +1,6 @@
+#ifndef PARSER_H
+#define PARSER_H
+
 enum LexicalType {
     NUMBER,
     SPACE,
@@ -18,4 +21,6 @@ struct Token {
     } u;
 };
 
-int parse_one(int, struct Token*);
+int parse_one(int prev_ch, struct Token* out_token);
+
+#endif
