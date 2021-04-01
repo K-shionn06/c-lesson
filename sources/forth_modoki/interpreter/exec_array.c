@@ -9,7 +9,10 @@
 
 #define MAX_NAME_OP_NUMBERS 256
 
-
+struct EA_ElementArray {
+    int len;
+    struct EA_Element elements[];
+};
 
 
 static void copy_element_type(struct EA_Element* elem, enum EA_ElementDataType dtype) {
@@ -211,6 +214,7 @@ static void test_compile_exec_array_nest() {
     assert_array_element_string(4, "def", elem.u.byte_codes->elements);
 }
 
+#if 0
 int main() {
     test_compile_exec_array_number();
     test_compile_exec_array_mix();
@@ -218,3 +222,4 @@ int main() {
 
     return 0;
 }
+#endif

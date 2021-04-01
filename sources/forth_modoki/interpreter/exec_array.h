@@ -18,10 +18,5 @@ struct EA_Element {
     union EA_ElementData u;
 };
 
-struct EA_ElementArray {
-    int len;
-    struct EA_Element elements[];
-};
 
-
-void compile_exec_array();
+void compile_exec_array(struct EA_Element* out_element);
