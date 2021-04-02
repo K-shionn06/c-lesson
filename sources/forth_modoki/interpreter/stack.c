@@ -50,11 +50,11 @@ void stack_push_number(int data) {
     global_stack.pos++;
 }
 
-void stack_push_byte_codes(struct EA_ElementArray* elem_ary) {
+void stack_push_byte_codes(struct EA_ElementArray* byte_codes) {
     assert( !stack_isfull() );
 
     global_stack.array[global_stack.pos].dtype = S_BYTE_CODES;
-    global_stack.array[global_stack.pos].u.byte_codes = elem_ary;
+    global_stack.array[global_stack.pos].u.byte_codes = byte_codes;
     global_stack.pos++;
 }
 
@@ -249,84 +249,91 @@ static void test_stack_isempty() {
     assert(true == actual);
 }
 
-static void assert_stack_array_byte_codes(int idx, struct EA_ElementArray* expect_elem_ary) {
-    assert(S_BYTE_CODES == global_stack.array[idx].dtype);
-    
-    struct EA_ElementArray* actual_elem_ary = global_stack.array[idx].u.byte_codes;
+/* unit test for EA_ElementArray a.k.a byte_codes */
 
-    assert( is_same_byte_codes(expect_elem_ary, actual_elem_ary) );
+static void assert_stack_array_byte_codes(
+    int idx, 
+    struct EA_ElementArray* expect_byte_codes)
+{
+    assert(S_BYTE_CODES == global_stack.array[idx].dtype);
+    struct EA_ElementArray* actual_byte_codes = global_stack.array[idx].u.byte_codes;
+    assert( is_same_byte_codes(expect_byte_codes, actual_byte_codes) );
+}
+
+static struct EA_ElementArray* call_stack_push_byte_codes(char* input) {
+    cl_getc_set_src(input);
+    struct EA_Element input_elem;
+    compile_exec_array(&input_elem);
+
+    stack_push_byte_codes(input_elem.u.byte_codes);
+
+    return input_elem.u.byte_codes;
 }
 
 static void verify_push_byte_codes(char* input) {
-    cl_getc_set_src(input);
-
     stack_clear();
-    struct EA_Element input_elem;
-    compile_exec_array(&input_elem);
-    stack_push_byte_codes(input_elem.u.byte_codes);
 
-    assert_stack_array_byte_codes(0, input_elem.u.byte_codes);
+    struct EA_ElementArray* expect_byte_codes = call_stack_push_byte_codes(input);
+
+    assert_stack_array_byte_codes(0, expect_byte_codes);
 }
 
 static void test_push_byte_codes() {
-    verify_push_byte_codes("1 2 3 4 5 6 7 8 9 10 }");
-    verify_push_byte_codes("3 add 3 2999 sam tom bob 499 2000}");
-    verify_push_byte_codes("12 34 /efg { 123 add } def }");
+    char* input1 = "1 2 3 4 5 6 7 8 9 10 }";
+    char* input2 = "3 add 3 2999 sam tom bob 499 2000}";
+    char* input3 = "12 34 /efg { 123 add } def }";
+    
+    verify_push_byte_codes(input1);
+    verify_push_byte_codes(input2);
+    verify_push_byte_codes(input3);
 }
 
 static void test_push_two_byte_codes() {
+    char* input1 = "1 2 3}";
+    char* input2 = "4 5 6}";
+
     stack_clear();
 
-    cl_getc_set_src("1 2 3}");
-    struct EA_Element input_elem1;
-    compile_exec_array(&input_elem1);
-    stack_push_byte_codes(input_elem1.u.byte_codes);
+    struct EA_ElementArray* expect_byte_codes1 = call_stack_push_byte_codes(input1);
+    struct EA_ElementArray* expect_byte_codes2 = call_stack_push_byte_codes(input2);
 
-    cl_getc_set_src("4 5 6}");
-    struct EA_Element input_elem2;
-    compile_exec_array(&input_elem2);
-    stack_push_byte_codes(input_elem2.u.byte_codes);
-
-    assert_stack_array_byte_codes(0, input_elem1.u.byte_codes);
-    assert_stack_array_byte_codes(1, input_elem2.u.byte_codes);
+    assert_stack_array_byte_codes(0, expect_byte_codes1);
+    assert_stack_array_byte_codes(1, expect_byte_codes2);
 }
 
 static void verify_pop_byte_codes(char* input) {
-    cl_getc_set_src(input);
-
     stack_clear();
-    struct EA_Element input_elem;
-    compile_exec_array(&input_elem);
-    stack_push_byte_codes(input_elem.u.byte_codes);
 
+    struct EA_ElementArray* expect_byte_codes = call_stack_push_byte_codes(input);
     struct EA_ElementArray* actual_byte_codes = stack_pop_byte_codes();
 
-    assert(is_same_byte_codes(input_elem.u.byte_codes, actual_byte_codes));
+    assert(is_same_byte_codes(expect_byte_codes, actual_byte_codes));
 }
 
 static void test_pop_byte_codes() {
-    verify_pop_byte_codes("1 2 3 4 5 6 7 8 9 10 }");
-    verify_pop_byte_codes("3 add 3 2999 sam tom bob 499 2000}");
-    verify_pop_byte_codes("12 34 /efg { 123 add } def }");
+    char* input1 = "1 2 3 4 5 6 7 8 9 10 }";
+    char* input2 = "3 add 3 2999 sam tom bob 499 2000}";
+    char* input3 = "12 34 /efg { 123 add } def }";
+    
+    verify_pop_byte_codes(input1);
+    verify_pop_byte_codes(input2);
+    verify_pop_byte_codes(input3);
 }
 
 static void test_pop_two_byte_codes() {
+    char* input1 = "1 2 3}";
+    char* input2 = "4 5 6}";
+
     stack_clear();
 
-    cl_getc_set_src("1 2 3}");
-    struct EA_Element input_elem1;
-    compile_exec_array(&input_elem1);
-    stack_push_byte_codes(input_elem1.u.byte_codes);
-
-    cl_getc_set_src("4 5 6}"); struct EA_Element input_elem2;
-    compile_exec_array(&input_elem2);
-    stack_push_byte_codes(input_elem2.u.byte_codes);
+    struct EA_ElementArray* expect_byte_codes1 = call_stack_push_byte_codes(input1);
+    struct EA_ElementArray* expect_byte_codes2 = call_stack_push_byte_codes(input2);
 
     struct EA_ElementArray* actual_byte_codes2 = stack_pop_byte_codes();
     struct EA_ElementArray* actual_byte_codes1 = stack_pop_byte_codes();
 
-    assert(is_same_byte_codes(input_elem1.u.byte_codes, actual_byte_codes1));
-    assert(is_same_byte_codes(input_elem2.u.byte_codes, actual_byte_codes2));
+    assert(is_same_byte_codes(expect_byte_codes1, actual_byte_codes1));
+    assert(is_same_byte_codes(expect_byte_codes2, actual_byte_codes2));
 }
 
 static void test_suite() {
