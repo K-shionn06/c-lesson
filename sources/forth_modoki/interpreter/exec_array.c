@@ -1,5 +1,6 @@
 #include "exec_array.h"
 #include "parser.h"
+#include "streq.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,11 +9,6 @@
 #include <assert.h>
 
 #define MAX_NAME_OP_NUMBERS 256
-
-struct EA_ElementArray {
-    int len;
-    struct EA_Element elements[];
-};
 
 
 static void copy_element_type(struct EA_Element* elem, enum EA_ElementDataType dtype) {
@@ -105,6 +101,47 @@ void compile_exec_array(struct EA_Element* out_element) {
 
 /* unit test */
 
+
+bool is_same_byte_codes(
+    struct EA_ElementArray* elem_ary1,
+    struct EA_ElementArray* elem_ary2)
+{
+    if (elem_ary1->len != elem_ary2->len)
+        return false;
+
+    int len = elem_ary1->len;
+    struct EA_Element *elem1, *elem2;
+
+    for (int i = 0; i < len; i++) {
+        elem1 = &elem_ary1->elements[i];
+        elem2 = &elem_ary2->elements[i];
+
+        if (elem1->dtype != elem2->dtype)
+            return false;
+
+        switch (elem1->dtype) {
+            default:
+                assert(false);
+
+            case EA_NUMBER:
+                if (elem1->u.number != elem2->u.number)
+                    return false;
+                break;
+
+            case EA_EXE_NAME:
+            case EA_LIT_NAME:
+                if ( !streq(elem1->u.name, elem2->u.name) )
+                    return false;
+                break;
+
+            case EA_BYTE_CODES:
+                if ( !is_same_byte_codes(elem1->u.byte_codes, elem2->u.byte_codes) )
+                    return false;
+                break;
+        }
+    }
+    return true;
+}
 
 static void dump_element_array(struct EA_Element* elem, int size) {
     puts("-----------------");

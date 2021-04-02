@@ -50,6 +50,14 @@ void stack_push_number(int data) {
     global_stack.pos++;
 }
 
+void stack_push_byte_codes(struct EA_ElementArray* elem_ary) {
+    assert( !stack_isfull() );
+
+    global_stack.array[global_stack.pos].dtype = S_BYTE_CODES;
+    global_stack.array[global_stack.pos].u.byte_codes = elem_ary;
+    global_stack.pos++;
+}
+
 static void stack_push_string(enum S_ElementDataType dtype, char* data) {
     assert( !stack_isfull() );
     assert((S_EXE_NAME == dtype) || (S_LIT_NAME == dtype));
@@ -80,6 +88,9 @@ static void stack_pop(struct S_Element* out_elem) {
         case S_LIT_NAME:
             out_elem->u.name = global_stack.array[global_stack.pos].u.name;
             break;
+        case S_BYTE_CODES:
+            out_elem->u.byte_codes = global_stack.array[global_stack.pos].u.byte_codes;
+            break;
     }
 }
 
@@ -90,6 +101,15 @@ int stack_pop_number() {
     assert(S_NUMBER == elem.dtype);
 
     return elem.u.number;
+}
+
+struct EA_ElementArray* stack_pop_byte_codes() {
+    struct S_Element elem;
+    stack_pop(&elem);
+
+    assert(S_BYTE_CODES == elem.dtype);
+
+    return elem.u.byte_codes;
 }
 
 static char* stack_pop_string(enum S_ElementDataType dtype) {
@@ -229,6 +249,86 @@ static void test_stack_isempty() {
     assert(true == actual);
 }
 
+static void assert_stack_array_byte_codes(int idx, struct EA_ElementArray* expect_elem_ary) {
+    assert(S_BYTE_CODES == global_stack.array[idx].dtype);
+    
+    struct EA_ElementArray* actual_elem_ary = global_stack.array[idx].u.byte_codes;
+
+    assert( is_same_byte_codes(expect_elem_ary, actual_elem_ary) );
+}
+
+static void verify_push_byte_codes(char* input) {
+    cl_getc_set_src(input);
+
+    stack_clear();
+    struct EA_Element input_elem;
+    compile_exec_array(&input_elem);
+    stack_push_byte_codes(input_elem.u.byte_codes);
+
+    assert_stack_array_byte_codes(0, input_elem.u.byte_codes);
+}
+
+static void test_push_byte_codes() {
+    verify_push_byte_codes("1 2 3 4 5 6 7 8 9 10 }");
+    verify_push_byte_codes("3 add 3 2999 sam tom bob 499 2000}");
+    verify_push_byte_codes("12 34 /efg { 123 add } def }");
+}
+
+static void test_push_two_byte_codes() {
+    stack_clear();
+
+    cl_getc_set_src("1 2 3}");
+    struct EA_Element input_elem1;
+    compile_exec_array(&input_elem1);
+    stack_push_byte_codes(input_elem1.u.byte_codes);
+
+    cl_getc_set_src("4 5 6}");
+    struct EA_Element input_elem2;
+    compile_exec_array(&input_elem2);
+    stack_push_byte_codes(input_elem2.u.byte_codes);
+
+    assert_stack_array_byte_codes(0, input_elem1.u.byte_codes);
+    assert_stack_array_byte_codes(1, input_elem2.u.byte_codes);
+}
+
+static void verify_pop_byte_codes(char* input) {
+    cl_getc_set_src(input);
+
+    stack_clear();
+    struct EA_Element input_elem;
+    compile_exec_array(&input_elem);
+    stack_push_byte_codes(input_elem.u.byte_codes);
+
+    struct EA_ElementArray* actual_byte_codes = stack_pop_byte_codes();
+
+    assert(is_same_byte_codes(input_elem.u.byte_codes, actual_byte_codes));
+}
+
+static void test_pop_byte_codes() {
+    verify_pop_byte_codes("1 2 3 4 5 6 7 8 9 10 }");
+    verify_pop_byte_codes("3 add 3 2999 sam tom bob 499 2000}");
+    verify_pop_byte_codes("12 34 /efg { 123 add } def }");
+}
+
+static void test_pop_two_byte_codes() {
+    stack_clear();
+
+    cl_getc_set_src("1 2 3}");
+    struct EA_Element input_elem1;
+    compile_exec_array(&input_elem1);
+    stack_push_byte_codes(input_elem1.u.byte_codes);
+
+    cl_getc_set_src("4 5 6}"); struct EA_Element input_elem2;
+    compile_exec_array(&input_elem2);
+    stack_push_byte_codes(input_elem2.u.byte_codes);
+
+    struct EA_ElementArray* actual_byte_codes2 = stack_pop_byte_codes();
+    struct EA_ElementArray* actual_byte_codes1 = stack_pop_byte_codes();
+
+    assert(is_same_byte_codes(input_elem1.u.byte_codes, actual_byte_codes1));
+    assert(is_same_byte_codes(input_elem2.u.byte_codes, actual_byte_codes2));
+}
+
 static void test_suite() {
     test_stack_push_number_123();
     // test_stack_pop_when_empty();
@@ -243,11 +343,14 @@ static void test_suite() {
 
     test_stack_isempty();
     test_stack_isfull();
+
+    test_push_byte_codes();
+    test_push_two_byte_codes();
+    test_pop_byte_codes();
+    test_pop_two_byte_codes();
 }
 
-#if 0
 int main() {
     test_suite();
     return 0;
 }
-#endif
