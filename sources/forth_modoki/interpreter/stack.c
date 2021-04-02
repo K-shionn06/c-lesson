@@ -1,4 +1,5 @@
 #include "stack.h"
+#include "streq.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -150,7 +151,7 @@ static void test_stack_push_string_as_exe() {
     stack_push_string(S_EXE_NAME, input);
 
     assert(S_EXE_NAME == global_stack.array[0].dtype);
-    assert(0 == strcmp(input, global_stack.array[0].u.name));
+    assert(streq(input, global_stack.array[0].u.name));
 }
 
 static void test_stack_push_string_as_lit() {
@@ -160,7 +161,7 @@ static void test_stack_push_string_as_lit() {
     stack_push_string(S_LIT_NAME, input);
 
     assert(S_LIT_NAME == global_stack.array[0].dtype);
-    assert(0 == strcmp(input, global_stack.array[0].u.name));
+    assert(streq(input, global_stack.array[0].u.name));
 }
 
 static void test_stack_pop_when_empty() {
@@ -191,7 +192,7 @@ static void test_stack_pop_exe_name() {
 
     actual = stack_pop_string(S_EXE_NAME);
 
-    assert(0 == strcmp(input, actual));
+    assert(streq(input, actual));
 }
 
 static void test_stack_pop_lit_name() {
@@ -203,7 +204,7 @@ static void test_stack_pop_lit_name() {
 
     actual = stack_pop_string(S_LIT_NAME);
 
-    assert(0 == strcmp(input, actual));
+    assert(streq(input, actual));
 }
 
 static void test_stack_isfull() {

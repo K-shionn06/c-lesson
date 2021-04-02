@@ -1,4 +1,5 @@
 #include "dict.h"
+#include "streq.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -20,13 +21,6 @@ struct D_ArrayElement* array[TABLE_SIZE];
 
 /* functions */
 
-
-bool streq(const char* s1, const char* s2) {
-    if (0 == strcmp(s1, s2))
-        return true;
-    else
-        return false;
-}
 
 static int hash(char* str) {
     unsigned int val = 0;
