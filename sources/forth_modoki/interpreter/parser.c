@@ -204,7 +204,7 @@ static void test_parse_one_number() {
 
 static void test_parse_one_empty_should_return_END_OF_FILE() {
     char* input = "";
-    int expect = END_OF_FILE;
+    enum LexicalType expect = END_OF_FILE;
 
     struct Token token = {UNKNOWN, {0}};
     int ch;
@@ -219,7 +219,7 @@ static void test_parse_one_empty_should_return_END_OF_FILE() {
 static void test_parse_one_executable_name() {
     char* input = "add123";
     char* expect_name = "add123";
-    int expect_type = EXECUTABLE_NAME;
+    enum LexicalType expect_type = EXECUTABLE_NAME;
 
     struct Token token = {UNKNOWN, {0}};
     int ch;
@@ -235,7 +235,7 @@ static void test_parse_one_executable_name() {
 static void test_parse_one_literal_name() {
     char* input = "/add123";
     char* expect_name = "add123";
-    int expect_type = LITERAL_NAME;
+    enum LexicalType expect_type = LITERAL_NAME;
 
     struct Token token = {UNKNOWN, {0}};
     int ch;
@@ -251,7 +251,7 @@ static void test_parse_one_literal_name() {
 static void test_parse_one_open_curly() {
     char* input = "{";
     char expect_onechar = '{';
-    int expect_type = OPEN_CURLY;
+    enum LexicalType expect_type = OPEN_CURLY;
 
     struct Token token = {UNKNOWN, {0}};
     int ch;
@@ -267,7 +267,7 @@ static void test_parse_one_open_curly() {
 static void test_parse_one_close_curly() {
     char* input = "}";
     char expect_onechar = '}';
-    int expect_type = CLOSE_CURLY;
+    enum LexicalType expect_type = CLOSE_CURLY;
 
     struct Token token = {UNKNOWN, {0}};
     int ch;
