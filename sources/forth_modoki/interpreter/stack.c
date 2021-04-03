@@ -336,7 +336,7 @@ static void test_suite() {
 
     test_push_byte_codes();
     test_push_two_byte_codes();
-    test_pop_two_byte_codes();
+    test_pop_byte_codes();
     test_pop_two_byte_codes();
 }
 
