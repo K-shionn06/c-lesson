@@ -24,7 +24,7 @@ struct S_Element {
 void stack_push_number(int data);
 void stack_push_exe_name(char* data);
 void stack_push_lit_name(char* data);
-void stack_push_byte_codes(struct EA_ElementArray* elem_ary);
+void stack_push_byte_codes(struct EA_ElementArray* byte_codes);
 
 
 void stack_pop(struct S_Element* out_elem);
