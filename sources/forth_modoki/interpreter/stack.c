@@ -260,80 +260,63 @@ static void assert_stack_array_byte_codes(
     assert( is_same_byte_codes(expect_byte_codes, actual_byte_codes) );
 }
 
-static struct EA_ElementArray* call_stack_push_byte_codes(char* input) {
+static void call_compile_exec_array(
+    char* input,
+    struct EA_Element* out_elem)
+{
     cl_getc_set_src(input);
+    compile_exec_array(out_elem);
+} 
+
+static void test_push_byte_codes() {
     struct EA_Element input_elem;
-    compile_exec_array(&input_elem);
+    call_compile_exec_array("1 2 3 4 5 6 add sum}", &input_elem);
+    stack_clear();
 
     stack_push_byte_codes(input_elem.u.byte_codes);
 
-    return input_elem.u.byte_codes;
-}
-
-static void verify_push_byte_codes(char* input) {
-    stack_clear();
-
-    struct EA_ElementArray* expect_byte_codes = call_stack_push_byte_codes(input);
-
-    assert_stack_array_byte_codes(0, expect_byte_codes);
-}
-
-static void test_push_byte_codes() {
-    char* input1 = "1 2 3 4 5 6 7 8 9 10 }";
-    char* input2 = "3 add 3 2999 sam tom bob 499 2000}";
-    char* input3 = "12 34 /efg { 123 add } def }";
-    
-    verify_push_byte_codes(input1);
-    verify_push_byte_codes(input2);
-    verify_push_byte_codes(input3);
+    assert_stack_array_byte_codes(0, input_elem.u.byte_codes);
 }
 
 static void test_push_two_byte_codes() {
-    char* input1 = "1 2 3}";
-    char* input2 = "4 5 6}";
-
+    struct EA_Element input_elem1;
+    call_compile_exec_array("1 2 3 4 5 6 add sum}", &input_elem1);
+    struct EA_Element input_elem2;
+    call_compile_exec_array("6 5 4 3 2 1 add sum}", &input_elem2);
     stack_clear();
 
-    struct EA_ElementArray* expect_byte_codes1 = call_stack_push_byte_codes(input1);
-    struct EA_ElementArray* expect_byte_codes2 = call_stack_push_byte_codes(input2);
+    stack_push_byte_codes(input_elem1.u.byte_codes);
+    stack_push_byte_codes(input_elem2.u.byte_codes);
 
-    assert_stack_array_byte_codes(0, expect_byte_codes1);
-    assert_stack_array_byte_codes(1, expect_byte_codes2);
-}
-
-static void verify_pop_byte_codes(char* input) {
-    stack_clear();
-
-    struct EA_ElementArray* expect_byte_codes = call_stack_push_byte_codes(input);
-    struct EA_ElementArray* actual_byte_codes = stack_pop_byte_codes();
-
-    assert(is_same_byte_codes(expect_byte_codes, actual_byte_codes));
+    assert_stack_array_byte_codes(0, input_elem1.u.byte_codes);
+    assert_stack_array_byte_codes(1, input_elem2.u.byte_codes);
 }
 
 static void test_pop_byte_codes() {
-    char* input1 = "1 2 3 4 5 6 7 8 9 10 }";
-    char* input2 = "3 add 3 2999 sam tom bob 499 2000}";
-    char* input3 = "12 34 /efg { 123 add } def }";
-    
-    verify_pop_byte_codes(input1);
-    verify_pop_byte_codes(input2);
-    verify_pop_byte_codes(input3);
+    struct EA_Element input_elem;
+    call_compile_exec_array("1 2 3 4 5 6 add sum}", &input_elem);
+    stack_clear();
+    stack_push_byte_codes(input_elem.u.byte_codes);
+
+    struct EA_ElementArray* actual_byte_codes = stack_pop_byte_codes();
+
+    assert( is_same_byte_codes(input_elem.u.byte_codes, actual_byte_codes) );
 }
 
 static void test_pop_two_byte_codes() {
-    char* input1 = "1 2 3}";
-    char* input2 = "4 5 6}";
-
+    struct EA_Element input_elem1;
+    call_compile_exec_array("1 2 3 4 5 6 add sum}", &input_elem1);
+    struct EA_Element input_elem2;
+    call_compile_exec_array("6 5 4 3 2 1 add sum}", &input_elem2);
     stack_clear();
-
-    struct EA_ElementArray* expect_byte_codes1 = call_stack_push_byte_codes(input1);
-    struct EA_ElementArray* expect_byte_codes2 = call_stack_push_byte_codes(input2);
+    stack_push_byte_codes(input_elem1.u.byte_codes);
+    stack_push_byte_codes(input_elem2.u.byte_codes);
 
     struct EA_ElementArray* actual_byte_codes2 = stack_pop_byte_codes();
     struct EA_ElementArray* actual_byte_codes1 = stack_pop_byte_codes();
 
-    assert(is_same_byte_codes(expect_byte_codes1, actual_byte_codes1));
-    assert(is_same_byte_codes(expect_byte_codes2, actual_byte_codes2));
+    assert( is_same_byte_codes(input_elem1.u.byte_codes, actual_byte_codes1) );
+    assert( is_same_byte_codes(input_elem2.u.byte_codes, actual_byte_codes2) );
 }
 
 static void test_suite() {
@@ -353,7 +336,7 @@ static void test_suite() {
 
     test_push_byte_codes();
     test_push_two_byte_codes();
-    test_pop_byte_codes();
+    test_pop_two_byte_codes();
     test_pop_two_byte_codes();
 }
 
