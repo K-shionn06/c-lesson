@@ -340,7 +340,9 @@ static void test_suite() {
     test_pop_two_byte_codes();
 }
 
+#if 0
 int main() {
     test_suite();
     return 0;
 }
+#endif

@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "stack.h"
 #include "dict.h"
+#include "exec_array.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -16,10 +17,23 @@ static void execute_add() {
 }
 
 static void execute_def() {
-    int number = stack_pop_number();
+    struct S_Element s_elem;
+    stack_pop(&s_elem);
+
     char *lit_name = stack_pop_lit_name();
-    
-    dict_put_number(lit_name, number);
+
+    switch (s_elem.dtype) {
+        default:
+            assert(false);
+
+        case S_NUMBER:
+            dict_put_number(lit_name, s_elem.u.number);
+            break;
+
+        case S_BYTE_CODES:
+            dict_put_byte_codes(lit_name, s_elem.u.byte_codes);
+            break;
+    }
 }
 
 static void register_primitives() {
@@ -33,35 +47,49 @@ void eval() {
         UNKNOWN,
         {0}
     };
+    struct D_Element* d_elem;
+    struct EA_Element ea_elem;
 
     do {
         ch = parse_one(ch, &token);
         if (UNKNOWN!= token.ltype) {
             switch (token.ltype) {
+                default:
+                    assert(false);
+
+                case SPACE:
+                    break;
+
                 case NUMBER:
                     stack_push_number(token.u.number);
                     break;
 
                 case EXECUTABLE_NAME:
-                    if (dict_key_isused(token.u.name)) {
-                        struct D_ElemValue* value;
-                        value = dict_get(token.u.name);
-                        
-                        if (V_C_FUNC == value->vtype)
-                            value->u.cfunc();
-                        else
-                            stack_push_number(value->u.number);
-                    }
-                    else {
+                    if ( !dict_key_isused(token.u.name) )
                         assert(false);
+
+                    d_elem = dict_get(token.u.name);
+                    switch (d_elem->dtype) {
+                        default:
+                            assert(false);
+
+                        case D_NUMBER:
+                            stack_push_number(d_elem->u.number);
+                            break;
+
+                        case D_C_FUNC:
+                            d_elem->u.cfunc();
+                            break;
                     }
                     break;
 
                 case LITERAL_NAME:
                     stack_push_lit_name(token.u.name);
                     break;
-                default:
-                    break;
+
+                case OPEN_CURLY:
+                    compile_exec_array(&ea_elem);
+                    stack_push_byte_codes(ea_elem.u.byte_codes);
             }
         }
     } while (EOF != ch);
