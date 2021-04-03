@@ -43,6 +43,9 @@ static void copy_element(struct D_Element* dest, struct D_Element* src) {
         case D_C_FUNC:
             dest->u.cfunc = src->u.cfunc;
             break;
+        case D_BYTE_CODES:
+            dest->u.byte_codes = src->u.byte_codes;
+            break;
     }
 }
 
@@ -124,6 +127,15 @@ void dict_put_cfunc(char* key, void (*cfunc)()) {
     struct D_Element elem = {
         .dtype = D_C_FUNC,
         .u.cfunc = cfunc
+    };
+
+    dict_put(key, &elem);
+}
+
+void dict_put_byte_codes(char* key, struct EA_ElementArray* byte_codes) {
+    struct D_Element elem = {
+        .dtype = D_BYTE_CODES,
+        .u.byte_codes = byte_codes
     };
 
     dict_put(key, &elem);
@@ -261,6 +273,7 @@ static void test_dict_get_type_cfunc() {
 }
 
 
+#if 0
 int main() {
     test_dict_put_number();
     test_dict_put_number_same_hash_two_numbers();
@@ -271,3 +284,4 @@ int main() {
 
     return 0;
 }
+#endif
