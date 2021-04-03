@@ -44,8 +44,8 @@ static void copy_array(
     memcpy(dst_array, src_array, sizeof(struct EA_Element) * size);
 }
 
-void compile_exec_array(struct EA_Element* out_element) {
-    int ch = EOF;
+int compile_exec_array(int prev_ch, struct EA_Element* out_element) {
+    int ch = prev_ch;
     struct Token token = {
         UNKNOWN,
         {0}
@@ -84,7 +84,7 @@ void compile_exec_array(struct EA_Element* out_element) {
                 break;
 
             case OPEN_CURLY:
-                compile_exec_array(&local_array[i]);
+                ch = compile_exec_array(ch, &local_array[i]);
                 i++;
                 break;
 
@@ -93,7 +93,7 @@ void compile_exec_array(struct EA_Element* out_element) {
                 copy_array(elem_ary->elements, local_array, elem_ary->len);
                 out_element->dtype = EA_BYTE_CODES;
                 out_element->u.byte_codes = elem_ary;
-                return;
+                return ch;
         }
     }
 }
@@ -143,7 +143,7 @@ bool is_same_byte_codes(
     return true;
 }
 
-static void dump_element_array(struct EA_Element* elem, int size) {
+void dump_element_array(struct EA_Element* elem, int size) {
     puts("-----------------");
     puts("idx | type, data");
     puts("-----------------");
@@ -189,7 +189,7 @@ static void test_compile_exec_array_number() {
     cl_getc_set_src(input);
 
     struct EA_Element elem;
-    compile_exec_array(&elem);
+    compile_exec_array(EOF, &elem);
     dump_element_array(elem.u.byte_codes->elements, elem.u.byte_codes->len); // debug
 
     assert(EA_BYTE_CODES == elem.dtype);
@@ -211,7 +211,7 @@ static void test_compile_exec_array_mix() {
     cl_getc_set_src(input);
 
     struct EA_Element elem;
-    compile_exec_array(&elem);
+    compile_exec_array(EOF, &elem);
     dump_element_array(elem.u.byte_codes->elements, elem.u.byte_codes->len); // debug
 
     assert(EA_BYTE_CODES == elem.dtype);
@@ -232,7 +232,7 @@ static void test_compile_exec_array_nest() {
     cl_getc_set_src(input);
 
     struct EA_Element elem;
-    compile_exec_array(&elem);
+    compile_exec_array(EOF, &elem);
     dump_element_array(elem.u.byte_codes->elements, elem.u.byte_codes->len); // debug
 
     assert_array_element_number(0, 12, elem.u.byte_codes->elements);
