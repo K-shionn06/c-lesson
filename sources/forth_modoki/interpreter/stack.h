@@ -26,6 +26,8 @@ void stack_push_exe_name(char* data);
 void stack_push_lit_name(char* data);
 void stack_push_byte_codes(struct EA_ElementArray* elem_ary);
 
+
+void stack_pop(struct S_Element* out_elem);
 int stack_pop_number();
 char* stack_pop_exe_name();
 char* stack_pop_lit_name();

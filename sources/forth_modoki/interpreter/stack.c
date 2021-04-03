@@ -74,7 +74,7 @@ void stack_push_lit_name(char* data) {
     stack_push_string(S_LIT_NAME, data);
 }
 
-static void stack_pop(struct S_Element* out_elem) {
+void stack_pop(struct S_Element* out_elem) {
     assert( !stack_isempty() );
 
     global_stack.pos--;
