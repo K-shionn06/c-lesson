@@ -27,9 +27,14 @@ struct EA_ElementArray {
     struct EA_Element elements[];
 };
 
+/* Returns look-ahead character */
 int compile_exec_array(int prev_ch, struct EA_Element* out_element);
+
 bool is_same_byte_codes(
     struct EA_ElementArray* elem_ary1,
     struct EA_ElementArray* elem_ary2);
+
+/* elem is the first element of byte_codes->elements array */
+void dump_element_array(struct EA_Element* elem, int size);
 
 #endif
