@@ -1,4 +1,5 @@
 #include "exec_array.h"
+#include "clesson.h"
 #include "parser.h"
 #include "streq.h"
 
@@ -89,7 +90,7 @@ int compile_exec_array(int prev_ch, struct EA_Element* out_element) {
                 break;
 
             case CLOSE_CURLY:
-                elem_ary = create_empty_elementArray(i+1);
+                elem_ary = create_empty_elementArray(i);
                 copy_array(elem_ary->elements, local_array, elem_ary->len);
                 out_element->dtype = EA_BYTE_CODES;
                 out_element->u.byte_codes = elem_ary;
@@ -147,7 +148,7 @@ void dump_element_array(struct EA_Element* elem, int size) {
     puts("-----------------");
     puts("idx | type, data");
     puts("-----------------");
-    for (int i = 0; i < size-1; i++) {
+    for (int i = 0; i < size; i++) {
         switch (elem[i].dtype) {
             default:
                 assert(false);
