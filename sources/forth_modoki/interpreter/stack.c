@@ -1,12 +1,14 @@
 #include "stack.h"
+#include "clesson.h"
 #include "streq.h"
+#include "exec_array.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
 
-#define STACK_SIZE 1024
+#define STACK_SIZE 32
 
 struct Stack {
     unsigned int pos;
@@ -141,8 +143,13 @@ void stack_print_all() {
                 break;
             case S_EXE_NAME:
             case S_LIT_NAME:
-                printf("     | %p | -> %s\n", global_stack.array[i].u.name,
-                                                global_stack.array[i].u.name);
+                printf("     | %p | -> %s\n", 
+                    global_stack.array[i].u.name,
+                    global_stack.array[i].u.name);
+                break;
+            case S_BYTE_CODES:
+                printf("     | %p | -> byte_codes\n", 
+                    global_stack.array[i].u.byte_codes);
                 break;
         }
         printf("%04d |----------------|\n", i);
@@ -265,7 +272,7 @@ static void call_compile_exec_array(
     struct EA_Element* out_elem)
 {
     cl_getc_set_src(input);
-    compile_exec_array(out_elem);
+    compile_exec_array(EOF, out_elem);
 } 
 
 static void test_push_byte_codes() {
