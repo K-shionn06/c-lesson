@@ -154,10 +154,34 @@ static void execute_ifelse() {
         eval_exec_array(byte_codes2);
 }
 
+static void execute_sub() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    stack_push_number(number2 - number1);
+}
+
+static void execute_div() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    stack_push_number(number2 / number1);
+}
+
+static void execute_mul() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    stack_push_number(number1 * number2);
+}
+
 static void register_primitives() {
     dict_put_cfunc("add", execute_add);
     dict_put_cfunc("def", execute_def);
     dict_put_cfunc("ifelse", execute_ifelse);
+    dict_put_cfunc("sub", execute_sub);
+    dict_put_cfunc("div", execute_div);
+    dict_put_cfunc("mul", execute_mul);
 }
 
 /* Unit tests */
@@ -288,6 +312,83 @@ static void test_eval_ifelse_false() {
     assert(expect == actual);
 }
 
+static void test_eval_sub() {
+    char* input = "20 10 sub";
+    int expect = 10;
+    
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_div() {
+    char* input = "35 8 div";
+    int expect = 4;
+    
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_mul() {
+    char* input = "8 32 mul";
+    int expect = 256;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+/*
+
+static void test_eval_eq() {
+    char* input = "299 299 eq";
+    int expect = 1;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_neq() {
+    char* input = "299 299 neq";
+    int expect = 0;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_gt() {
+}
+
+static void test_eval_ge() {
+}
+static void test_eval_lt();
+static void test_eval_le();
+
+*/
+
 int main() {
     register_primitives();
 
@@ -302,6 +403,10 @@ int main() {
 
     test_eval_ifelse_true();
     test_eval_ifelse_false();
+
+    test_eval_sub();
+    test_eval_div();
+    test_eval_mul();
 
     return 0;
 }
