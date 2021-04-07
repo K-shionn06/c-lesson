@@ -9,37 +9,8 @@
 #include <string.h>
 
 
-static void execute_add() {
-    int number1 = stack_pop_number();
-    int number2 = stack_pop_number();
+/* functions */
 
-    stack_push_number(number1 + number2);
-}
-
-static void execute_def() {
-    struct S_Element s_elem;
-    stack_pop(&s_elem);
-
-    char *lit_name = stack_pop_lit_name();
-
-    switch (s_elem.dtype) {
-        default:
-            assert(false);
-
-        case S_NUMBER:
-            dict_put_number(lit_name, s_elem.u.number);
-            break;
-
-        case S_BYTE_CODES:
-            dict_put_byte_codes(lit_name, s_elem.u.byte_codes);
-            break;
-    }
-}
-
-static void register_primitives() {
-    dict_put_cfunc("add", execute_add);
-    dict_put_cfunc("def", execute_def);
-}
 
 static void eval_exec_array(struct EA_ElementArray *byte_codes) {
     struct EA_Element* byte_code;
@@ -143,6 +114,51 @@ static void eval() {
     } while (EOF != ch);
 }
 
+static void execute_add() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    stack_push_number(number1 + number2);
+}
+
+static void execute_def() {
+    struct S_Element s_elem;
+    stack_pop(&s_elem);
+
+    char *lit_name = stack_pop_lit_name();
+
+    switch (s_elem.dtype) {
+        default:
+            assert(false);
+
+        case S_NUMBER:
+            dict_put_number(lit_name, s_elem.u.number);
+            break;
+
+        case S_BYTE_CODES:
+            dict_put_byte_codes(lit_name, s_elem.u.byte_codes);
+            break;
+    }
+}
+
+static void execute_ifelse() {
+    struct EA_ElementArray* byte_codes2 = stack_pop_byte_codes();
+    struct EA_ElementArray* byte_codes1 = stack_pop_byte_codes();
+    int boolean = stack_pop_number();
+
+    assert((1 == boolean) || (0 == boolean));
+
+    if(boolean)
+        eval_exec_array(byte_codes1);
+    else
+        eval_exec_array(byte_codes2);
+}
+
+static void register_primitives() {
+    dict_put_cfunc("add", execute_add);
+    dict_put_cfunc("def", execute_def);
+    dict_put_cfunc("ifelse", execute_ifelse);
+}
 
 /* Unit tests */
 
@@ -176,7 +192,6 @@ static void test_eval_num_two() {
     assert(expect1 == actual1);
     assert(expect2 == actual2);
 }
-
 
 static void test_eval_num_add() {
     char *input = "1 2 add";
@@ -247,6 +262,32 @@ static void test_eval_exec_array_complex() {
     assert(expect == actual);
 }
 
+static void test_eval_ifelse_true() {
+    char* input = "20 1 {30 add} {20 add} ifelse";
+    int expect = 50;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_ifelse_false() {
+    char* input = "20 0 {30 add} {20 add} ifelse";
+    int expect = 40;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
 int main() {
     register_primitives();
 
@@ -258,6 +299,9 @@ int main() {
 
     test_eval_exec_array();
     test_eval_exec_array_complex();
+
+    test_eval_ifelse_true();
+    test_eval_ifelse_false();
 
     return 0;
 }
