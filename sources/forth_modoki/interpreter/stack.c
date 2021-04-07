@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define STACK_SIZE 32
+#define STACK_SIZE 10
 
 struct Stack {
     unsigned int pos;
@@ -141,18 +141,24 @@ void stack_print_all() {
             case S_NUMBER:
                 printf("     | %014d |\n", global_stack.array[i].u.number);
                 break;
+
             case S_EXE_NAME:
             case S_LIT_NAME:
                 printf("     | %p | -> %s\n", 
                     global_stack.array[i].u.name,
                     global_stack.array[i].u.name);
                 break;
+
             case S_BYTE_CODES:
                 printf("     | %p | -> byte_codes\n", 
                     global_stack.array[i].u.byte_codes);
                 break;
         }
-        printf("%04d |----------------|\n", i);
+
+        if (global_stack.pos == i) 
+            printf("%04d |----------------| POS\n", i);
+        else
+            printf("%04d |----------------|\n", i);
     }
     puts("-----------------------------");
 }
