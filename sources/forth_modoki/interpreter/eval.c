@@ -205,6 +205,36 @@ static void execute_gt() {
         stack_push_number(0);
 }
 
+static void execute_ge() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    if (number2 >= number1)
+        stack_push_number(1);
+    else
+        stack_push_number(0);
+}
+
+static void execute_lt() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    if (number2 < number1)
+        stack_push_number(1);
+    else
+        stack_push_number(0);
+}
+
+static void execute_le() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    if (number2 <= number1)
+        stack_push_number(1);
+    else
+        stack_push_number(0);
+}
+
 static void register_primitives() {
     dict_put_cfunc("add", execute_add);
     dict_put_cfunc("def", execute_def);
@@ -215,6 +245,9 @@ static void register_primitives() {
     dict_put_cfunc("eq", execute_eq);
     dict_put_cfunc("neq", execute_neq);
     dict_put_cfunc("gt", execute_gt);
+    dict_put_cfunc("ge", execute_ge);
+    dict_put_cfunc("lt", execute_lt);
+    dict_put_cfunc("le", execute_le);
 }
 
 /* Unit tests */
@@ -388,7 +421,6 @@ static void test_eval_gt_true() {
     int actual = stack_pop_number();
 
     assert_true(actual);
-
 }
 
 static void test_eval_gt_false() {
@@ -398,6 +430,33 @@ static void test_eval_gt_false() {
     int actual = stack_pop_number();
 
     assert_false(actual);
+}
+
+static void test_eval_ge_true() {
+    char* input_exepct_true = "1 1 ge";
+
+    eval_with_input(input_exepct_true);
+    int actual = stack_pop_number();
+
+    assert_true(actual);
+}
+
+static void test_eval_lt_true() {
+    char* input_exepct_true = "1 2 lt";
+
+    eval_with_input(input_exepct_true);
+    int actual = stack_pop_number();
+
+    assert_true(actual);
+}
+
+static void test_eval_le_true() {
+    char* input_exepct_true = "1 1 ge";
+
+    eval_with_input(input_exepct_true);
+    int actual = stack_pop_number();
+
+    assert_true(actual);
 }
 
 static void test_suite() {
@@ -421,6 +480,10 @@ static void test_suite() {
     test_eval_neq();
     test_eval_gt_true();
     test_eval_gt_false();
+    
+    test_eval_ge_true();
+    test_eval_lt_true();
+    test_eval_le_true();
 }
 
 int main() {
