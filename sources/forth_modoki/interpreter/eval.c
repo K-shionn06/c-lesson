@@ -254,19 +254,24 @@ static void execute_dup() {
     stack_push_number(number);
 }
 
+static void stack_pop_number_n_times(int n, int* out_array) {
+    for (int i = 0; n > i; i++) {
+        out_array[i] = stack_pop_number();
+    }
+}
+
 static void execute_index() {
     int stack_buf[STACK_SIZE];
     int n = stack_pop_number();
+    stack_pop_number_n_times(n+1, stack_buf);
 
-    for (int i = 0; n >= i; ++i) {
-        stack_buf[i] = stack_pop_number();
-    }
+    int n_th_number = stack_buf[n];
 
     for (int i = n; 0 <= i; --i) {
         stack_push_number(stack_buf[i]);
     }
 
-    stack_push_number(stack_buf[n]);
+    stack_push_number(n_th_number);
 }
 
 static void register_primitives() {
