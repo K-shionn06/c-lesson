@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define STACK_SIZE 10
 
 struct Stack {
     unsigned int pos;

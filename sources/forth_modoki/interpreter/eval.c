@@ -235,19 +235,61 @@ static void execute_le() {
         stack_push_number(0);
 }
 
+static void execute_pop() {
+    stack_pop_number();
+}
+
+static void execute_exch() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    stack_push_number(number1);
+    stack_push_number(number2);
+}
+
+static void execute_dup() {
+    int number = stack_pop_number();
+
+    stack_push_number(number);
+    stack_push_number(number);
+}
+
+static void execute_index() {
+    int stack_buf[STACK_SIZE];
+    int n = stack_pop_number();
+
+    for (int i = 0; n >= i; ++i) {
+        stack_buf[i] = stack_pop_number();
+    }
+
+    for (int i = n; 0 <= i; --i) {
+        stack_push_number(stack_buf[i]);
+    }
+
+    stack_push_number(stack_buf[n]);
+}
+
 static void register_primitives() {
-    dict_put_cfunc("add", execute_add);
     dict_put_cfunc("def", execute_def);
-    dict_put_cfunc("ifelse", execute_ifelse);
+
+    dict_put_cfunc("add", execute_add);
     dict_put_cfunc("sub", execute_sub);
     dict_put_cfunc("div", execute_div);
     dict_put_cfunc("mul", execute_mul);
+
+    dict_put_cfunc("ifelse", execute_ifelse);
+
     dict_put_cfunc("eq", execute_eq);
     dict_put_cfunc("neq", execute_neq);
     dict_put_cfunc("gt", execute_gt);
     dict_put_cfunc("ge", execute_ge);
     dict_put_cfunc("lt", execute_lt);
     dict_put_cfunc("le", execute_le);
+
+    dict_put_cfunc("pop", execute_pop);
+    dict_put_cfunc("exch", execute_exch);
+    dict_put_cfunc("dup", execute_dup);
+    dict_put_cfunc("index", execute_index);
 }
 
 /* Unit tests */
@@ -415,9 +457,9 @@ static void test_eval_neq() {
 }
 
 static void test_eval_gt_true() {
-    char* input_exepct_true = "2 1 gt";
+    char* input_expect_true = "2 1 gt";
 
-    eval_with_input(input_exepct_true);
+    eval_with_input(input_expect_true);
     int actual = stack_pop_number();
 
     assert_true(actual);
@@ -433,30 +475,86 @@ static void test_eval_gt_false() {
 }
 
 static void test_eval_ge_true() {
-    char* input_exepct_true = "1 1 ge";
+    char* input_expect_true = "1 1 ge";
 
-    eval_with_input(input_exepct_true);
+    eval_with_input(input_expect_true);
     int actual = stack_pop_number();
 
     assert_true(actual);
 }
 
 static void test_eval_lt_true() {
-    char* input_exepct_true = "1 2 lt";
+    char* input_expect_true = "1 2 lt";
 
-    eval_with_input(input_exepct_true);
+    eval_with_input(input_expect_true);
     int actual = stack_pop_number();
 
     assert_true(actual);
 }
 
 static void test_eval_le_true() {
-    char* input_exepct_true = "1 1 ge";
+    char* input_expect_true = "1 1 ge";
 
-    eval_with_input(input_exepct_true);
+    eval_with_input(input_expect_true);
     int actual = stack_pop_number();
 
     assert_true(actual);
+}
+
+static void test_eval_pop_once() {
+    char* input = "1 2 3 pop";
+    int expect = 2;
+
+    eval_with_input(input);
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_pop_twice() {
+    char* input = "1 2 3 pop pop";
+    int expect = 1;
+
+    eval_with_input(input);
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_exch() {
+    char* input = "1 2 exch";
+    int expect1 = 1;
+    int expect2 = 2;
+
+    eval_with_input(input);
+    int actual1 = stack_pop_number();
+    int actual2 = stack_pop_number();
+
+    assert(expect1 == actual1);
+    assert(expect2 == actual2);
+}
+
+static void test_eval_dup() {
+    char* input = "1 dup";
+    int expect = 1;
+
+    eval_with_input(input);
+    int actual1 = stack_pop_number();
+    int actual2 = stack_pop_number();
+
+    assert(expect == actual1);
+    assert(expect == actual2);
+}
+
+static void test_eval_index() {
+    char* input = "1 2 3 4 5 6 7 8 9 10 \
+                   4 index";
+    int expect = 6;
+
+    eval_with_input(input);
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
 }
 
 static void test_suite() {
@@ -480,10 +578,15 @@ static void test_suite() {
     test_eval_neq();
     test_eval_gt_true();
     test_eval_gt_false();
-    
     test_eval_ge_true();
     test_eval_lt_true();
     test_eval_le_true();
+
+    test_eval_pop_once();
+    test_eval_pop_twice();
+    test_eval_exch();
+    test_eval_dup();
+    test_eval_index();
 }
 
 int main() {
