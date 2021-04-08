@@ -21,7 +21,7 @@ struct Stack global_stack;
 /* core functions for global_stack */
 
 
-static void stack_clear() {
+void stack_clear() {
     for (int i = 0; i < STACK_SIZE; i++) {
         global_stack.array[i].dtype = S_NUMBER;
         global_stack.array[i].u.number = 0;

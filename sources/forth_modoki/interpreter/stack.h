@@ -23,6 +23,8 @@ struct S_Element {
     union S_ElementData u;
 };
 
+void stack_clear();
+
 void stack_push_number(int data);
 void stack_push_exe_name(char* data);
 void stack_push_lit_name(char* data);

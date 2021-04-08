@@ -255,8 +255,14 @@ static void execute_dup() {
 }
 
 static void stack_pop_number_n_times(int n, int* out_array) {
-    for (int i = 0; n > i; i++) {
+    for (int i = 0; n > i; ++i) {
         out_array[i] = stack_pop_number();
+    }
+}
+
+static void stack_push_number_n_times(int n, int* array) {
+    for (int i = n; 0 < i; --i) {
+        stack_push_number(array[i-1]);
     }
 }
 
@@ -267,11 +273,39 @@ static void execute_index() {
 
     int n_th_number = stack_buf[n];
 
-    for (int i = n; 0 <= i; --i) {
-        stack_push_number(stack_buf[i]);
+    stack_push_number_n_times(n+1, stack_buf);
+    stack_push_number(n_th_number);
+}
+
+static void roll_array_once(int *array, int size) {
+    int top = array[0];
+    int max_idx = size - 1;
+
+    for (int i = 0; i < max_idx; ++i) {
+        array[i] = array[i+1];
     }
 
-    stack_push_number(n_th_number);
+    array[max_idx] = top;
+};
+
+static void roll_array_n_times(int n, int *array, int size) {
+    for (int i = 0; i < n; ++i) {
+        roll_array_once(array, size);
+    }
+}
+
+static void execute_roll() {
+    int stack_buf[STACK_SIZE];
+
+    int n = stack_pop_number();
+    int j = stack_pop_number();
+    j = j % n;
+
+    stack_pop_number_n_times(n, stack_buf);
+
+    roll_array_n_times(j, stack_buf, n);
+
+    stack_push_number_n_times(n, stack_buf);
 }
 
 static void register_primitives() {
@@ -295,6 +329,8 @@ static void register_primitives() {
     dict_put_cfunc("exch", execute_exch);
     dict_put_cfunc("dup", execute_dup);
     dict_put_cfunc("index", execute_index);
+
+    dict_put_cfunc("roll", execute_roll);
 }
 
 /* Unit tests */
@@ -562,6 +598,80 @@ static void test_eval_index() {
     assert(expect == actual);
 }
 
+static void test_roll_array_once() {
+    int input[] = {1, 2, 3, 4};
+    int actual[] = {1, 2, 3, 4};
+
+    roll_array_once(actual, 4);
+
+    assert(input[0] == actual[3]);
+    assert(input[1] == actual[0]);
+    assert(input[2] == actual[1]);
+    assert(input[3] == actual[2]);
+}
+
+static void test_roll_array_n_times() {
+    int input[] = {1, 2, 3, 4};
+    int actual[] = {1, 2, 3, 4};
+
+    roll_array_n_times(3, actual, 4);
+
+    assert(input[0] == actual[3]);
+    assert(input[1] == actual[2]);
+    assert(input[2] == actual[1]);
+    assert(input[3] == actual[0]);
+}
+
+static void test_eval_roll() {
+    char* input = "1 2 3 4 \
+                   3 3 roll";
+    int expect1 = 2;
+    int expect2 = 4;
+    int expect3 = 3;
+
+    stack_clear();
+    eval_with_input(input);
+    stack_print_all();
+    int actual1 = stack_pop_number();
+    int actual2 = stack_pop_number();
+    int actual3 = stack_pop_number();
+
+    printf("[debug] expect1: %d, actual1: %d\n", expect1, actual1);
+    assert(expect1 == actual1);
+    assert(expect2 == actual2);
+    assert(expect3 == actual3);
+}
+
+static void test_eval_roll_complex() {
+    char* input = "0 1 2 3 4 5 6 7 8 9 10 \
+                   11 16 roll";
+
+    eval_with_input(input);
+    int actual1 = stack_pop_number();
+    int actual2 = stack_pop_number();
+    int actual3 = stack_pop_number();
+    int actual4 = stack_pop_number();
+    int actual5 = stack_pop_number();
+    int actual6 = stack_pop_number();
+    int actual7 = stack_pop_number();
+    int actual8 = stack_pop_number();
+    int actual9 = stack_pop_number();
+    int actual10 = stack_pop_number();
+    int actual11 = stack_pop_number();
+
+    assert(4 == actual1);
+    assert(3 == actual2);
+    assert(2 == actual3);
+    assert(1 == actual4);
+    assert(0 == actual5);
+    assert(10 == actual6);
+    assert(9 == actual7);
+    assert(8 == actual8);
+    assert(7 == actual9);
+    assert(6 == actual10);
+    assert(5 == actual11);
+}
+
 static void test_suite() {
     test_eval_num_one();
     test_eval_num_two();
@@ -592,6 +702,10 @@ static void test_suite() {
     test_eval_exch();
     test_eval_dup();
     test_eval_index();
+
+    test_roll_array_once();
+    //test_eval_roll();
+    //test_eval_roll_complex();
 }
 
 int main() {
