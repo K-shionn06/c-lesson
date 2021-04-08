@@ -267,13 +267,9 @@ static void stack_push_number_n_times(int n, int* array) {
 }
 
 static void execute_index() {
-    int stack_buf[STACK_SIZE];
     int n = stack_pop_number();
-    stack_pop_number_n_times(n+1, stack_buf);
+    int n_th_number = stack_peek_n_th_number(n);
 
-    int n_th_number = stack_buf[n];
-
-    stack_push_number_n_times(n+1, stack_buf);
     stack_push_number(n_th_number);
 }
 

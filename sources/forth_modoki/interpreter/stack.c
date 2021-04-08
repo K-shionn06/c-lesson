@@ -132,6 +132,34 @@ char* stack_pop_lit_name() {
     return stack_pop_string(S_LIT_NAME);
 }
 
+static void stack_peek_n_th(int n, struct S_Element* out_elem) {
+    int n_th_pos = global_stack.pos - (n+1);
+
+    out_elem->dtype = global_stack.array[n_th_pos].dtype;
+
+    switch (out_elem->dtype) {
+        case S_NUMBER:
+            out_elem->u.number = global_stack.array[n_th_pos].u.number;
+            break;
+        case S_EXE_NAME:
+        case S_LIT_NAME:
+            out_elem->u.name = global_stack.array[n_th_pos].u.name;
+            break;
+        case S_BYTE_CODES:
+            out_elem->u.byte_codes = global_stack.array[n_th_pos].u.byte_codes;
+            break;
+    }
+}
+
+int stack_peek_n_th_number(int n) {
+    struct S_Element elem;
+    stack_peek_n_th(n, &elem);
+
+    assert(S_NUMBER == elem.dtype);
+
+    return elem.u.number;
+}
+
 void stack_print_all() {
     int i;
     puts("-----------------------------");
