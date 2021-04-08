@@ -160,6 +160,19 @@ int stack_peek_n_th_number(int n) {
     return elem.u.number;
 }
 
+void stack_roll_once(int n) {
+    assert(0 <= n);
+
+    int pos = global_stack.pos;
+    int top_data = global_stack.array[pos-1].u.number;
+
+    for (int i = 1; i < n; ++i) {
+        global_stack.array[pos - i].u.number = global_stack.array[pos - (i+1)].u.number;
+    }
+
+    global_stack.array[pos - n].u.number = top_data;
+}
+
 void stack_print_all() {
     int i;
     puts("-----------------------------");
@@ -359,6 +372,29 @@ static void test_pop_two_byte_codes() {
     assert( is_same_byte_codes(input_elem2.u.byte_codes, actual_byte_codes2) );
 }
 
+static void test_stack_roll_once() {
+    // input  = {1, 2, 3, 4}
+    // expect = {4, 1, 2, 3}
+
+    stack_push_number(1);
+    stack_push_number(2);
+    stack_push_number(3);
+    stack_push_number(4);
+
+    stack_roll_once(4);
+
+    int actual[4];
+    actual[0] = stack_pop_number();
+    actual[1] = stack_pop_number();
+    actual[2] = stack_pop_number();
+    actual[3] = stack_pop_number();
+
+    assert(3 == actual[0]);
+    assert(2 == actual[1]);
+    assert(1 == actual[2]);
+    assert(4 == actual[3]);
+}
+
 static void test_suite() {
     test_stack_push_number_123();
     // test_stack_pop_when_empty();
@@ -378,6 +414,8 @@ static void test_suite() {
     test_push_two_byte_codes();
     test_pop_byte_codes();
     test_pop_two_byte_codes();
+
+    test_stack_roll_once();
 }
 
 #if 0
