@@ -175,6 +175,36 @@ static void execute_mul() {
     stack_push_number(number1 * number2);
 }
 
+static void execute_eq() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    if (number1 == number2)
+        stack_push_number(1);
+    else
+        stack_push_number(0);
+}
+
+static void execute_neq() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    if (number1 != number2)
+        stack_push_number(1);
+    else
+        stack_push_number(0);
+}
+
+static void execute_gt() {
+    int number1 = stack_pop_number();
+    int number2 = stack_pop_number();
+
+    if (number1 > number2)
+        stack_push_number(1);
+    else
+        stack_push_number(0);
+}
+
 static void register_primitives() {
     dict_put_cfunc("add", execute_add);
     dict_put_cfunc("def", execute_def);
@@ -182,19 +212,32 @@ static void register_primitives() {
     dict_put_cfunc("sub", execute_sub);
     dict_put_cfunc("div", execute_div);
     dict_put_cfunc("mul", execute_mul);
+    dict_put_cfunc("eq", execute_eq);
+    dict_put_cfunc("neq", execute_neq);
+    dict_put_cfunc("gt", execute_gt);
 }
 
 /* Unit tests */
 
 
+static void eval_with_input(char* input) {
+    cl_getc_set_src(input);
+    eval();
+}
+
+static void assert_true(int actual) {
+    assert(1 == actual);
+}
+
+static void assert_false(int actual) {
+    assert(0 == actual);
+}
+
 static void test_eval_num_one() {
     char *input = "123";
     int expect = 123;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -206,10 +249,7 @@ static void test_eval_num_two() {
     int expect1 = 456;
     int expect2 = 123;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual1 = stack_pop_number();
     int actual2 = stack_pop_number();
 
@@ -221,10 +261,7 @@ static void test_eval_num_add() {
     char *input = "1 2 add";
     int expect = 3;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -234,10 +271,7 @@ static void test_eval_lit() {
     char *input = "/helloworld";
     char *expect = "helloworld";
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     char *actual = stack_pop_lit_name();
 
     assert(0 == strcmp(expect, actual));
@@ -247,10 +281,7 @@ static void test_eval_def() {
     char *input = "/abc 123 def /efg 456 def abc efg add";
     int expect = 579;
     
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -260,10 +291,7 @@ static void test_eval_exec_array() {
     char *input = "/abc {1 2} def abc add";
     int expect = 3;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -277,10 +305,7 @@ static void test_eval_exec_array_complex() {
          ZZYYadd";
     int expect = 17;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -290,10 +315,7 @@ static void test_eval_ifelse_true() {
     char* input = "20 1 {30 add} {20 add} ifelse";
     int expect = 50;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -303,10 +325,7 @@ static void test_eval_ifelse_false() {
     char* input = "20 0 {30 add} {20 add} ifelse";
     int expect = 40;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -316,10 +335,7 @@ static void test_eval_sub() {
     char* input = "20 10 sub";
     int expect = 10;
     
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -329,10 +345,7 @@ static void test_eval_div() {
     char* input = "35 8 div";
     int expect = 4;
     
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -342,25 +355,17 @@ static void test_eval_mul() {
     char* input = "8 32 mul";
     int expect = 256;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
 }
 
-/*
-
 static void test_eval_eq() {
     char* input = "299 299 eq";
     int expect = 1;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -370,28 +375,39 @@ static void test_eval_neq() {
     char* input = "299 299 neq";
     int expect = 0;
 
-    cl_getc_set_src(input);
-
-    eval();
-
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
 }
 
-static void test_eval_gt() {
+static void test_eval_gt_true() {
+    char* input_exepct_true = "1 2 gt";
+
+    eval_with_input(input_exepct_true);
+    int actual = stack_pop_number();
+
+    assert_true(actual);
+
 }
 
+static void test_eval_gt_false() {
+    char* input_expect_false = "1 1 gt";
+
+    eval_with_input(input_expect_false);
+    int actual = stack_pop_number();
+
+    assert_false(actual);
+}
+
+#if 0
 static void test_eval_ge() {
 }
 static void test_eval_lt();
 static void test_eval_le();
+#endif
 
-*/
-
-int main() {
-    register_primitives();
-
+static void test_suite() {
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
@@ -407,6 +423,17 @@ int main() {
     test_eval_sub();
     test_eval_div();
     test_eval_mul();
+
+    test_eval_eq();
+    test_eval_neq();
+    test_eval_gt_true();
+    test_eval_gt_false();
+}
+
+int main() {
+    register_primitives();
+
+    test_suite();
 
     return 0;
 }
