@@ -199,7 +199,7 @@ static void execute_gt() {
     int number1 = stack_pop_number();
     int number2 = stack_pop_number();
 
-    if (number1 > number2)
+    if (number2 > number1)
         stack_push_number(1);
     else
         stack_push_number(0);
@@ -382,7 +382,7 @@ static void test_eval_neq() {
 }
 
 static void test_eval_gt_true() {
-    char* input_exepct_true = "1 2 gt";
+    char* input_exepct_true = "2 1 gt";
 
     eval_with_input(input_exepct_true);
     int actual = stack_pop_number();
@@ -399,13 +399,6 @@ static void test_eval_gt_false() {
 
     assert_false(actual);
 }
-
-#if 0
-static void test_eval_ge() {
-}
-static void test_eval_lt();
-static void test_eval_le();
-#endif
 
 static void test_suite() {
     test_eval_num_one();
