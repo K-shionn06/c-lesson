@@ -9,6 +9,8 @@
 #include <assert.h>
 
 
+#define STACK_SIZE 1024
+
 struct Stack {
     unsigned int pos;
     struct S_Element array[STACK_SIZE];

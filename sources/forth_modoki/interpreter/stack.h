@@ -3,8 +3,6 @@
 #ifndef STACK_H
 #define STACK_H
 
-#define STACK_SIZE 24
-
 enum S_ElementDataType {
     S_NUMBER,
     S_EXE_NAME,
