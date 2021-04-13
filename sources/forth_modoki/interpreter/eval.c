@@ -271,6 +271,22 @@ static void execute_roll() {
     }
 }
 
+static void execute_if() {
+    struct EA_ElementArray* byte_codes = stack_pop_byte_codes();
+    int boolean = stack_pop_number();
+
+    assert((1 == boolean) || (0 == boolean));
+
+    if(boolean)
+        eval_exec_array(byte_codes);
+}
+
+static void execute_exec() {
+    struct EA_ElementArray* byte_codes = stack_pop_byte_codes();
+
+    eval_exec_array(byte_codes);
+}
+
 static void register_primitives() {
     dict_put_cfunc("def", execute_def);
 
@@ -294,6 +310,9 @@ static void register_primitives() {
     dict_put_cfunc("index", execute_index);
 
     dict_put_cfunc("roll", execute_roll);
+
+    dict_put_cfunc("if", execute_if);
+    dict_put_cfunc("exec", execute_exec);
 }
 
 /* Unit tests */
@@ -615,6 +634,28 @@ static void test_eval_roll_complex() {
     assert(6 == actual11);
 }
 
+static void test_eval_if() {
+    char* input = "10 1 {100 add} if";
+    int expect = 110;
+
+    eval_with_input(input);
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_exec() {
+    char* input = "1 2 3 {100 add} exec";
+    int expect = 103;
+
+    eval_with_input(input);
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
 static void test_suite() {
     test_eval_num_one();
     test_eval_num_two();
@@ -648,6 +689,9 @@ static void test_suite() {
 
     test_eval_roll();
     test_eval_roll_complex();
+
+    test_eval_if();
+    test_eval_exec();
 }
 
 int main() {
