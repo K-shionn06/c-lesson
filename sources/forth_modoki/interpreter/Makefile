@@ -14,3 +14,6 @@ dict: streq.o dict.o
 
 eval: streq.o cl_getc.o parser.o exec_array.o stack.o dict.o eval.o
 	$(CC) -o a.out streq.o cl_getc.o parser.o exec_array.o stack.o dict.o eval.o
+
+interpreter: streq.o cl_getc.o parser.o exec_array.o stack.o dict.o eval.o interpreter.o
+	$(CC) -o a.out streq.o cl_getc.o parser.o exec_array.o stack.o dict.o eval.o interpreter.o

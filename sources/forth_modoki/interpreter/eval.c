@@ -56,7 +56,7 @@ static void eval_exec_array(struct EA_ElementArray *byte_codes) {
     }
 }
 
-static void eval() {
+void eval() {
     int ch = EOF;
     struct Token token = {
         UNKNOWN,
@@ -309,7 +309,7 @@ static void execute_while() {
     }
 }
 
-static void register_primitives() {
+void register_primitives() {
     dict_put_cfunc("def", execute_def);
 
     dict_put_cfunc("add", execute_add);
@@ -754,6 +754,7 @@ static void test_suite() {
     test_eval_while();
 }
 
+#if 0
 int main() {
     register_primitives();
 
@@ -761,3 +762,4 @@ int main() {
 
     return 0;
 }
+#endif
