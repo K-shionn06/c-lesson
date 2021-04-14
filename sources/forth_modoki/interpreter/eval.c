@@ -236,29 +236,37 @@ static void execute_le() {
 }
 
 static void execute_pop() {
-    stack_pop_number();
+    struct S_Element elem;
+    stack_pop(&elem);
 }
 
 static void execute_exch() {
-    int number1 = stack_pop_number();
-    int number2 = stack_pop_number();
+    struct S_Element elem1;
+    struct S_Element elem2;
 
-    stack_push_number(number1);
-    stack_push_number(number2);
+    stack_pop(&elem1);
+    stack_pop(&elem2);
+
+    stack_push(&elem1);
+    stack_push(&elem2);
 }
 
 static void execute_dup() {
-    int number = stack_pop_number();
+    struct S_Element elem;
 
-    stack_push_number(number);
-    stack_push_number(number);
+    stack_pop(&elem);
+
+    stack_push(&elem);
+    stack_push(&elem);
 }
 
 static void execute_index() {
     int n = stack_pop_number();
-    int n_th_number = stack_peek_n_th_number(n);
 
-    stack_push_number(n_th_number);
+    struct S_Element elem;
+    stack_peek_n_th(n, &elem);
+
+    stack_push(&elem);
 }
 
 static void execute_roll() {

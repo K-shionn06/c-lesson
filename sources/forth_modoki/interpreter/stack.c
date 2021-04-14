@@ -151,7 +151,7 @@ char* stack_pop_lit_name() {
     return stack_pop_string(S_LIT_NAME);
 }
 
-static void stack_peek_n_th(int n, struct S_Element* out_elem) {
+void stack_peek_n_th(int n, struct S_Element* out_elem) {
     int n_th_pos = global_stack.pos - (n+1);
 
     out_elem->dtype = global_stack.array[n_th_pos].dtype;

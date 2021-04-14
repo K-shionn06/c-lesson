@@ -36,7 +36,9 @@ char* stack_pop_exe_name();
 char* stack_pop_lit_name();
 struct EA_ElementArray* stack_pop_byte_codes();
 
+void stack_peek_n_th(int n, struct S_Element* out_elem);
 int stack_peek_n_th_number(int n);
+
 void stack_roll_once(int n);
 
 void stack_print_all();
