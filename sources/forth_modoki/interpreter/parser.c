@@ -42,13 +42,13 @@ int parse_one(int prev_ch, struct Token* out_token) {
     else
         c = prev_ch;
 
-    if (' ' == c) {
+    if (' ' == c || '\n' == c) {
         // ltype: SPACE
 
         out_token->ltype = SPACE;
         out_token->u.onechar = ' ';
 
-        while (' ' == c) {
+        while (' ' == c || '\n' == c) {
             c = cl_getc();
         }
 
