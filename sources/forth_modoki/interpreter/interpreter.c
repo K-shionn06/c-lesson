@@ -10,7 +10,7 @@ void init_interpreter() {
 
 int main() {
     init_interpreter();
-    cl_getc_attach_file("sample.ps");
+    cl_getc_attach_file("ps_prog/sample.ps");
 
     eval();
 

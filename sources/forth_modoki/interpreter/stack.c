@@ -195,7 +195,7 @@ void stack_roll_once(int n) {
 void stack_print_all() {
     int i;
     puts("-----------------------------");
-    for (i = STACK_SIZE-1; i >= 0; i--) {
+    for (i = global_stack.pos; i >= 0; i--) {
         switch (global_stack.array[i].dtype) {
             case S_NUMBER:
                 printf("     | %014d |\n", global_stack.array[i].u.number);

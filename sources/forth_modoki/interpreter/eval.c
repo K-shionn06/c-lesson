@@ -27,6 +27,10 @@ static void eval_exec_array(struct EA_ElementArray *byte_codes) {
                 stack_push_number(byte_code->u.number);
                 break;
 
+            case EA_BYTE_CODES:
+                stack_push_byte_codes(byte_code->u.byte_codes);
+                break;
+
             case EA_LIT_NAME:
                 stack_push_lit_name(byte_code->u.name);
                 break;

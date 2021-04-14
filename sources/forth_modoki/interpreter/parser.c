@@ -67,7 +67,7 @@ int parse_one(int prev_ch, struct Token* out_token) {
         return c;
     }
     else if ('}' == c) {
-        // ltype: CLOSE+CURLY
+        // ltype: CLOSE_CURLY
 
         out_token->ltype = CLOSE_CURLY;
         out_token->u.onechar = '}';
