@@ -77,6 +77,23 @@ void stack_push_lit_name(char* data) {
     stack_push_string(S_LIT_NAME, data);
 }
 
+void stack_push(struct S_Element* elem) {
+    switch (elem->dtype) {
+        case S_NUMBER:
+            stack_push_number(elem->u.number);
+            break;
+        case S_EXE_NAME:
+            stack_push_exe_name(elem->u.name);
+            break;
+        case S_LIT_NAME:
+            stack_push_lit_name(elem->u.name);
+            break;
+        case S_BYTE_CODES:
+            stack_push_byte_codes(elem->u.byte_codes);
+            break;
+    }
+}
+
 void stack_pop(struct S_Element* out_elem) {
     assert( !stack_isempty() );
 
