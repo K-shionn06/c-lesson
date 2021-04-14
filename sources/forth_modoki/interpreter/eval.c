@@ -287,6 +287,20 @@ static void execute_exec() {
     eval_exec_array(byte_codes);
 }
 
+static void execute_while() {
+    struct EA_ElementArray* body = stack_pop_byte_codes();
+    struct EA_ElementArray* cond = stack_pop_byte_codes();
+
+    eval_exec_array(cond);
+    int boolean = stack_pop_number();
+
+    while (1 == boolean) {
+        eval_exec_array(body);
+        eval_exec_array(cond);
+        boolean = stack_pop_number();
+    }
+}
+
 static void register_primitives() {
     dict_put_cfunc("def", execute_def);
 
@@ -313,6 +327,8 @@ static void register_primitives() {
 
     dict_put_cfunc("if", execute_if);
     dict_put_cfunc("exec", execute_exec);
+
+    dict_put_cfunc("while", execute_while);
 }
 
 /* Unit tests */
@@ -656,6 +672,40 @@ static void test_eval_exec() {
     assert(expect == actual);
 }
 
+static void test_eval_while() {
+    char* input = "\
+        100 \
+        /cnt 0 def \
+        {cnt 3 lt} \
+        {10 add /cnt cnt 1 add def} \
+        while";
+    int expect = 130;
+
+    eval_with_input(input);
+
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_repeat() {
+    char* input = "2 {1 2} repeat";
+    int expect1 = 1;
+    int expect2 = 2;
+
+    eval_with_input(input);
+
+    int actual1 = stack_pop_number();
+    int actual2 = stack_pop_number();
+    int actual3 = stack_pop_number();
+    int actual4 = stack_pop_number();
+
+    assert(expect2 == actual1);
+    assert(expect1 == actual2);
+    assert(expect2 == actual3);
+    assert(expect1 == actual4);
+}
+
 static void test_suite() {
     test_eval_num_one();
     test_eval_num_two();
@@ -692,6 +742,8 @@ static void test_suite() {
 
     test_eval_if();
     test_eval_exec();
+
+    test_eval_while();
 }
 
 int main() {
