@@ -145,18 +145,6 @@ static void execute_def() {
     }
 }
 
-static void execute_ifelse() {
-    struct EA_ElementArray* byte_codes2 = stack_pop_byte_codes();
-    struct EA_ElementArray* byte_codes1 = stack_pop_byte_codes();
-    int boolean = stack_pop_number();
-
-    assert((1 == boolean) || (0 == boolean));
-
-    if(boolean)
-        eval_exec_array(byte_codes1);
-    else
-        eval_exec_array(byte_codes2);
-}
 
 static void execute_sub() {
     int number1 = stack_pop_number();
@@ -283,6 +271,7 @@ static void execute_roll() {
     }
 }
 
+#if 0
 static void execute_if() {
     struct EA_ElementArray* byte_codes = stack_pop_byte_codes();
     int boolean = stack_pop_number();
@@ -291,6 +280,19 @@ static void execute_if() {
 
     if(boolean)
         eval_exec_array(byte_codes);
+}
+
+static void execute_ifelse() {
+    struct EA_ElementArray* byte_codes2 = stack_pop_byte_codes();
+    struct EA_ElementArray* byte_codes1 = stack_pop_byte_codes();
+    int boolean = stack_pop_number();
+
+    assert((1 == boolean) || (0 == boolean));
+
+    if(boolean)
+        eval_exec_array(byte_codes1);
+    else
+        eval_exec_array(byte_codes2);
 }
 
 static void execute_exec() {
@@ -312,6 +314,7 @@ static void execute_while() {
         boolean = stack_pop_number();
     }
 }
+#endif
 
 void register_primitives() {
     dict_put_cfunc("def", execute_def);
@@ -320,8 +323,6 @@ void register_primitives() {
     dict_put_cfunc("sub", execute_sub);
     dict_put_cfunc("div", execute_div);
     dict_put_cfunc("mul", execute_mul);
-
-    dict_put_cfunc("ifelse", execute_ifelse);
 
     dict_put_cfunc("eq", execute_eq);
     dict_put_cfunc("neq", execute_neq);
@@ -337,10 +338,13 @@ void register_primitives() {
 
     dict_put_cfunc("roll", execute_roll);
 
+#if 0
     dict_put_cfunc("if", execute_if);
+    dict_put_cfunc("ifelse", execute_ifelse);
     dict_put_cfunc("exec", execute_exec);
 
     dict_put_cfunc("while", execute_while);
+#endif
 }
 
 /* Unit tests */
@@ -430,26 +434,6 @@ static void test_eval_exec_array_complex() {
          /ZZYYadd {ZZ YY add} def \
          ZZYYadd";
     int expect = 17;
-
-    eval_with_input(input);
-    int actual = stack_pop_number();
-
-    assert(expect == actual);
-}
-
-static void test_eval_ifelse_true() {
-    char* input = "20 1 {30 add} {20 add} ifelse";
-    int expect = 50;
-
-    eval_with_input(input);
-    int actual = stack_pop_number();
-
-    assert(expect == actual);
-}
-
-static void test_eval_ifelse_false() {
-    char* input = "20 0 {30 add} {20 add} ifelse";
-    int expect = 40;
 
     eval_with_input(input);
     int actual = stack_pop_number();
@@ -662,12 +646,33 @@ static void test_eval_roll_complex() {
     assert(6 == actual11);
 }
 
+#if 0
 static void test_eval_if() {
     char* input = "10 1 {100 add} if";
     int expect = 110;
 
     eval_with_input(input);
 
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_ifelse_true() {
+    char* input = "20 1 {30 add} {20 add} ifelse";
+    int expect = 50;
+
+    eval_with_input(input);
+    int actual = stack_pop_number();
+
+    assert(expect == actual);
+}
+
+static void test_eval_ifelse_false() {
+    char* input = "20 0 {30 add} {20 add} ifelse";
+    int expect = 40;
+
+    eval_with_input(input);
     int actual = stack_pop_number();
 
     assert(expect == actual);
@@ -699,24 +704,7 @@ static void test_eval_while() {
 
     assert(expect == actual);
 }
-
-static void test_eval_repeat() {
-    char* input = "2 {1 2} repeat";
-    int expect1 = 1;
-    int expect2 = 2;
-
-    eval_with_input(input);
-
-    int actual1 = stack_pop_number();
-    int actual2 = stack_pop_number();
-    int actual3 = stack_pop_number();
-    int actual4 = stack_pop_number();
-
-    assert(expect2 == actual1);
-    assert(expect1 == actual2);
-    assert(expect2 == actual3);
-    assert(expect1 == actual4);
-}
+#endif
 
 static void test_suite() {
     test_eval_num_one();
@@ -727,9 +715,6 @@ static void test_suite() {
 
     test_eval_exec_array();
     test_eval_exec_array_complex();
-
-    test_eval_ifelse_true();
-    test_eval_ifelse_false();
 
     test_eval_sub();
     test_eval_div();
@@ -752,13 +737,16 @@ static void test_suite() {
     test_eval_roll();
     test_eval_roll_complex();
 
+#if 0
     test_eval_if();
+    test_eval_ifelse_true();
+    test_eval_ifelse_false();
     test_eval_exec();
 
     test_eval_while();
+#endif
 }
 
-#if 0
 int main() {
     register_primitives();
 
@@ -766,4 +754,3 @@ int main() {
 
     return 0;
 }
-#endif

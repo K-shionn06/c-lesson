@@ -14,6 +14,7 @@ static void init_interpreter() {
 /* unit tests */
 
 
+#if 0
 static void eval_with_file(char* file_name) {
     cl_getc_attach_file(file_name);
     eval();
@@ -79,3 +80,4 @@ int main() {
 
     return 0;
 }
+#endif
