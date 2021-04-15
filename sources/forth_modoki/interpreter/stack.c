@@ -19,7 +19,6 @@ struct Stack {
 
 struct Stack global_stack;
 
-
 /* core functions for global_stack */
 
 
@@ -331,14 +330,6 @@ static void assert_stack_array_byte_codes(
     struct EA_ElementArray* actual_byte_codes = global_stack.array[idx].u.byte_codes;
     assert( is_same_byte_codes(expect_byte_codes, actual_byte_codes) );
 }
-
-static void call_compile_exec_array(
-    char* input,
-    struct EA_Element* out_elem)
-{
-    cl_getc_set_src(input);
-    compile_exec_array(EOF, out_elem);
-} 
 
 static void test_push_byte_codes() {
     struct EA_Element input_elem;

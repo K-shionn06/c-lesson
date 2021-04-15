@@ -103,6 +103,14 @@ int compile_exec_array(int prev_ch, struct EA_Element* out_element) {
 /* unit test */
 
 
+void call_compile_exec_array(
+    char* input,
+    struct EA_Element* out_elem)
+{
+    cl_getc_set_src(input);
+    compile_exec_array(EOF, out_elem);
+} 
+
 bool is_same_byte_codes(
     struct EA_ElementArray* elem_ary1,
     struct EA_ElementArray* elem_ary2)

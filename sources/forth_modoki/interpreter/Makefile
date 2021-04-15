@@ -12,6 +12,9 @@ stack: streq.o cl_getc.o parser.o exec_array.o stack.o
 dict: streq.o dict.o
 	$(CC) -o a.out streq.o dict.o
 
+continuation: streq.o cl_getc.o parser.o exec_array.o continuation.o
+	$(CC) -o a.out streq.o cl_getc.o parser.o exec_array.o continuation.o
+
 eval: streq.o cl_getc.o parser.o exec_array.o stack.o dict.o eval.o
 	$(CC) -o a.out streq.o cl_getc.o parser.o exec_array.o stack.o dict.o eval.o
 
