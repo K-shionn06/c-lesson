@@ -1,0 +1,16 @@
+/square {
+    dup mul
+} def
+
+/sum_k_2 {
+    /max exch def
+    /cnt 2 def
+    1
+    {cnt max le}
+    {
+        cnt square add
+        /cnt cnt 1 add def
+    } while
+} def
+
+4 sum_k_2
